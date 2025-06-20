@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.AlertDialog
-import androidx.compose.material3.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,7 +18,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import utils.getFileSize
-import utils.openInFinder
+import utils.showInExplorer
 
 @Composable
 fun ImageInfoPanel(
@@ -59,10 +57,10 @@ fun ImageInfoPanel(
             }
             Button(
                 shape = MaterialTheme.shapes.medium,
-                onClick = { openInFinder(path) }
+                onClick = { showInExplorer(path) }
             ) {
                 Text(
-                    text = "Open in Finder",
+                    text = "Show",
                     overflow = TextOverflow.Ellipsis,
                     softWrap = false
                 )

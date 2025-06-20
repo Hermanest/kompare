@@ -1,5 +1,7 @@
 package utils
 
+import java.awt.FileDialog
+import java.awt.Frame
 import java.io.File
 
 fun getFileSize(path: String): String {
@@ -19,7 +21,7 @@ fun deleteFile(path: String) {
     }
 }
 
-fun openInFinder(path: String) {
+fun showInExplorer(path: String) {
     val file = File(path)
     if (!file.exists()) {
         println("File does not exist: $path")
@@ -47,4 +49,28 @@ fun openInFinder(path: String) {
         e.printStackTrace()
         println("Failed to open file: $path")
     }
+}
+
+fun openFilePicker(directory: Boolean): String? {
+    val frame = Frame().apply { isVisible = false }
+    val fileDialog = FileDialog(
+        frame,
+        "Select a ${if (directory) "Folder" else "File"}",
+        if (directory) FileDialog.LOAD else FileDialog.LOAD
+    )
+
+    if (System.getProperty("os.name") != "Mac OS X") {
+        throw NotImplementedError("File picker is not implemented for your platform")
+    }
+
+    System.setProperty("apple.awt.fileDialogForDirectories", directory.toString())
+
+    fileDialog.isVisible = true
+    val selectedPath = fileDialog.file?.let { fileDialog.directory + it }
+
+    System.clearProperty("apple.awt.fileDialogForDirectories")
+
+    frame.dispose()
+
+    return selectedPath
 }

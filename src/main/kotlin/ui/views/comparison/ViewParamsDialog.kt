@@ -14,9 +14,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ui.ComparisonStartData
+import kotlin.math.round
 
 @Composable
-fun FilterDialog(
+fun ViewParamsDialog(
+    startData: ComparisonStartData,
     currentThreshold: Float,
     onDismiss: () -> Unit,
     onApply: (Float) -> Unit
@@ -25,20 +28,20 @@ fun FilterDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text = "Edit Filters") },
+        title = { Text(text = "Edit Params") },
         backgroundColor = MaterialTheme.colorScheme.background,
         shape = MaterialTheme.shapes.large,
         text = {
             Column {
                 Text(
-                    text = "Comparison Threshold: ${sliderValue.toInt()}%",
+                    text = "Comparison Threshold: ${round(sliderValue * 100f) / 100f}%",
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 Slider(
                     value = sliderValue,
                     onValueChange = { sliderValue = it },
-                    valueRange = 0f..100f
+                    valueRange = (startData.baseThreshold * 100f)..100f
                 )
             }
         },

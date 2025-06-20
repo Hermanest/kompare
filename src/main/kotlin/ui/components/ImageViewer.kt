@@ -94,6 +94,7 @@ fun ImageViewer(
                         while (true) {
                             val event = awaitPointerEvent()
                             var changes = event.changes.first()
+                            changes.consume()
                             when (event.type) {
                                 PointerEventType.Scroll -> {
                                     recalculateBounds(scale = st.scale + changes.scrollDelta.y * 0.01f)

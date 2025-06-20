@@ -12,15 +12,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import core.Comparison
+import core.ComparisonGroup
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ComparisonListItem(
-    comparison: Comparison,
+    comparison: ComparisonGroup,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
@@ -35,14 +34,9 @@ fun ComparisonListItem(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "${comparison.name1} vs ${comparison.name2}",
+                text = comparison.mainName,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "Match: ${comparison.percentage()}%",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.Gray
             )
         }
     }

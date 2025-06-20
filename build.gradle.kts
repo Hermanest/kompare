@@ -21,10 +21,10 @@ dependencies {
     // (in a separate module for demo project and in testMain).
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
-    implementation("org.bytedeco:javacv-platform:1.5.11")
+    implementation("org.openpnp:opencv:4.9.0-0")
     implementation("org.jetbrains.compose.material3:material3-desktop:1.2.1")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
-
+    testImplementation(kotlin("test"))
 }
 
 compose.desktop {

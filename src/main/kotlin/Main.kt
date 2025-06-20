@@ -7,7 +7,9 @@ import ui.App
 
 
 fun main() {
-    System.setProperty("apple.awt.application.appearance", "system")
+    loadPlatformDependencies()
+    applyPlatformTweaks()
+    
     application {
         Window(
             title = "Kompare",

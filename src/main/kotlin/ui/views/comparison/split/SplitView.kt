@@ -2,7 +2,10 @@ package ui.views.comparison.split
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.onClick
@@ -11,12 +14,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import core.ComparisonGroup
 import core.RelativeComparisonGroup
 import ui.utils.getBitmapFromStorage
 
@@ -39,10 +40,11 @@ fun SplitView(
                     .fillMaxSize()
             ) {
                 val path = group.comparisons[index].path
-                
+
                 ImagePanel(
                     modifier = Modifier,
-                    path = path,
+                    index = index,
+                    group = group,
                     match = if (index > 0) group.comparisons[index].percentage else -1.0,
                     onDelete = { onDelete(path) }
                 )
@@ -54,21 +56,42 @@ fun SplitView(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ImagePanel(
-    path: String,
+    index: Int,
+    group: RelativeComparisonGroup,
     match: Double,
     modifier: Modifier = Modifier,
     onDelete: () -> Unit
 ) {
     var dialogOpen by remember { mutableStateOf(false) }
-
+    
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        val bitmap = path.getBitmapFromStorage()
 
         if (dialogOpen) {
-            ExpandedViewDialog(bitmap, path) {
-                dialogOpen = false
-            }
+            var previewIndex by remember(index) { mutableStateOf(index) }
+            
+            val previewPath = group.comparisons[previewIndex].path
+            val previewBitmap = previewPath.getBitmapFromStorage()
+
+            ExpandedViewDialog(
+                bitmap = previewBitmap,
+                path = previewPath,
+                onClose = { dialogOpen = false },
+                onNext = {
+                    if (previewIndex < group.size - 1) {
+                        previewIndex++
+                    }
+                },
+                onPrev = {
+                    if (previewIndex > 0) {
+                        previewIndex--
+                    }
+                }
+            )
         }
+        
+        val path = group.comparisons[index].path
+        val bitmap = path.getBitmapFromStorage()
+        
         Image(
             bitmap = bitmap,
             modifier = Modifier.onClick(onClick = {

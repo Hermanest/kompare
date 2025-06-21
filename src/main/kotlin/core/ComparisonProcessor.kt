@@ -4,12 +4,13 @@ import core.comparators.IImageComparator
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withLock
 import org.opencv.core.Mat
 import org.opencv.imgcodecs.Imgcodecs
 import org.opencv.imgcodecs.Imgcodecs.IMREAD_COLOR
 import utils.aspect
-import kotlin.collections.forEach
 
 private typealias GroupedImages = HashMap<Float, BatchedImages>
 private typealias BatchedImages = ArrayList<Pair<String, Mat>>
@@ -29,6 +30,7 @@ class ComparisonProcessor(private val comparator: IImageComparator) {
         coroutineScope {
             val totalPaths = paths.size
             var currentPath = 0
+            val mutex = Mutex()
 
             onStageChange("Preprocessing")
 
@@ -37,7 +39,11 @@ class ComparisonProcessor(private val comparator: IImageComparator) {
                     val img = load(path)
 
                     if (img != null) {
-                        putAspectMat(path, img, groupedImages)
+                        mutex.withLock {
+                            groupedImages
+                                .getOrPut(img.aspect) { ArrayList() }
+                                .add(path to img)
+                        }
                     }
 
                     currentPath++
@@ -164,12 +170,6 @@ class ComparisonProcessor(private val comparator: IImageComparator) {
         }
 
         return groups
-    }
-
-    private fun putAspectMat(path: String, mat: Mat, grouped: GroupedImages) {
-        val list = grouped.getOrPut(mat.aspect) { ArrayList() }
-
-        list.add(path to mat)
     }
 
     private fun load(path: String): Mat? {

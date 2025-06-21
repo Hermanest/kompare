@@ -93,8 +93,8 @@ fun ImageViewer(
                     awaitPointerEventScope {
                         while (true) {
                             val event = awaitPointerEvent()
-                            var changes = event.changes.first()
-                            changes.consume()
+                            val changes = event.changes.first().apply { consume() }
+   
                             when (event.type) {
                                 PointerEventType.Scroll -> {
                                     recalculateBounds(scale = st.scale + changes.scrollDelta.y * 0.01f)
@@ -109,7 +109,10 @@ fun ImageViewer(
                                 }
 
                                 PointerEventType.Move -> {
-                                    if (!snapEnabled) continue
+                                    if (!snapEnabled) {
+                                        continue
+                                    }
+                                    
                                     val delta = changes.position - changes.previousPosition
                                     recalculateBounds(st.posX + delta.x, st.posY + delta.y)
                                 }

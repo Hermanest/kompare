@@ -38,6 +38,10 @@ class ComparisonProcessor(private val comparator: IImageComparator) {
                 launch {
                     val img = load(path)
 
+                    // Awaiting mutation usually takes some time so we update the ui first
+                    currentPath++
+                    onProgressChange(currentPath, totalPaths)
+                    
                     if (img != null) {
                         mutex.withLock {
                             groupedImages
@@ -45,9 +49,6 @@ class ComparisonProcessor(private val comparator: IImageComparator) {
                                 .add(path to img)
                         }
                     }
-
-                    currentPath++
-                    onProgressChange(currentPath, totalPaths)
                 }
             }
         }

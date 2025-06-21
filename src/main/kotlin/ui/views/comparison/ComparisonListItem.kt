@@ -14,12 +14,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import core.ComparisonGroup
+import core.RelativeComparisonGroup
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ComparisonListItem(
-    comparison: ComparisonGroup,
+    comparison: RelativeComparisonGroup,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
@@ -34,7 +34,7 @@ fun ComparisonListItem(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = comparison.mainName,
+                text = comparison.main.name,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold
             )

@@ -24,15 +24,24 @@ fun ComparisonView(
     var filterThreshold by remember { mutableStateOf(startData.baseThreshold) }
     var isParamsDialogOpen by remember { mutableStateOf(false) }
 
+    val relativeComparisons = remember(comparisons) {
+        comparisons.associateWith { it.getComparisons() }
+    }
+
+    val relativeSelectedComparison = remember(selectedComparison) {
+        if (selectedComparison != null) {
+            relativeComparisons[selectedComparison]
+        } else {
+            null
+        }
+    }
+
     val filteredComparisons = remember(comparisons, filterThreshold) {
-        comparisons
-            .map { group ->
-                ComparisonGroup(
-                    mainPath = group.mainPath,
-                    other = group.other.filter { comp -> comp.similarity >= filterThreshold },
-                )
-            }
-            .filter { it.other.isNotEmpty() }
+        val threshold = filterThreshold.toDouble()
+
+        relativeComparisons.values
+            .map { it.withThreshold(threshold) }
+            .filter { it.comparisons.isNotEmpty() }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -81,11 +90,12 @@ fun ComparisonView(
                     LazyColumn {
                         items(filteredComparisons.size) { i ->
                             val comparison = filteredComparisons[i]
+                            
                             ComparisonListItem(
                                 comparison,
-                                isSelected = comparison == selectedComparison
+                                isSelected = comparison == relativeSelectedComparison
                             ) {
-                                onSelectComparison(comparison)
+                                onSelectComparison(comparison.parentGroup)
                             }
                         }
                     }
@@ -93,12 +103,14 @@ fun ComparisonView(
             }
 
             if (filteredComparisons.isNotEmpty()) {
-                if (selectedComparison != null) {
+                if (relativeSelectedComparison != null) {
                     SplitView(
                         modifier = Modifier.weight(1f),
-                        selectedComparison,
+                        relativeSelectedComparison,
                         //TODO: fix deletion
-                        onDelete = { onDeleteComparison(selectedComparison, Comparison("", 0.0), it) }
+                        onDelete = { 
+                            onDeleteComparison(relativeSelectedComparison.parentGroup, Comparison("", "", 0.0), it) 
+                        }
                     )
                 }
             } else {

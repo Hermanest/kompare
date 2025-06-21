@@ -17,13 +17,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import core.ComparisonGroup
+import core.RelativeComparisonGroup
 import ui.utils.getBitmapFromStorage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SplitView(
     modifier: Modifier = Modifier,
-    comparison: ComparisonGroup,
+    group: RelativeComparisonGroup,
     onDelete: (String) -> Unit,
 ) {
     LazyVerticalGrid(
@@ -31,17 +32,18 @@ fun SplitView(
         horizontalArrangement = Arrangement.SpaceAround,
         modifier = modifier
     ) {
-        items(comparison.size) { index ->
+        items(group.size) { index ->
             Card(
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxSize()
             ) {
-                val path = comparison.getPathAt(index)
+                val path = group.comparisons[index].path
+                
                 ImagePanel(
                     modifier = Modifier,
                     path = path,
-                    match = if (index > 0) comparison.other[index - 1].percentage else -1.0,
+                    match = if (index > 0) group.comparisons[index].percentage else -1.0,
                     onDelete = { onDelete(path) }
                 )
             }

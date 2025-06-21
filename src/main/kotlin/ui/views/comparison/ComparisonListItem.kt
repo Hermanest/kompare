@@ -30,10 +30,12 @@ fun ComparisonListItem(
     onClick: () -> Unit
 ) {
     val maxVisibleItems = 3
-    val remaining = comparison.comparisons.size - maxVisibleItems
-    val visibleComparisons = comparison.comparisons
+    val remaining = comparison.otherComparisons.size - maxVisibleItems
+    val visibleComparisons = comparison.otherComparisons
+        .asSequence()
         .sortedByDescending { it.similarity }
         .take(maxVisibleItems)
+        .toList()
 
     Card(
         modifier = Modifier

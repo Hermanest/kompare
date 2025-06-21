@@ -35,7 +35,7 @@ fun ImagePanel(
         if (dialogOpen) {
             var previewIndex by remember(index) { mutableStateOf(index) }
 
-            val previewPath = group.comparisons[previewIndex].path
+            val previewPath = group.combinedComparisons[previewIndex].path
             val previewBitmap = previewPath.getBitmapFromStorage()
 
             ExpandedViewDialog(
@@ -43,7 +43,7 @@ fun ImagePanel(
                 path = previewPath,
                 onClose = { dialogOpen = false },
                 onNext = {
-                    if (previewIndex < group.size - 1) {
+                    if (previewIndex < group.combinedComparisons.size - 1) {
                         previewIndex++
                     }
                 },
@@ -55,7 +55,7 @@ fun ImagePanel(
             )
         }
 
-        val path = group.comparisons[index].path
+        val path = group.combinedComparisons[index].path
         val bitmap = path.getBitmapFromStorage()
 
         Image(

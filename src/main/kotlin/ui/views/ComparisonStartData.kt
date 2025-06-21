@@ -12,6 +12,6 @@ enum class ActionType {
 class ComparisonStartData {
     var filePath by mutableStateOf<String?>(null)
     var directoryPath by mutableStateOf("")
-    var baseThreshold by mutableStateOf(0.7f)
+    var baseThreshold by mutableStateOf(0.5f)
     var action by mutableStateOf(ActionType.Find)
 }

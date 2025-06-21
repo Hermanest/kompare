@@ -41,7 +41,7 @@ fun ComparisonView(
 
         relativeComparisons.values
             .map { it.withThreshold(threshold) }
-            .filter { it.comparisons.isNotEmpty() }
+            .filter { it.otherComparisons.isNotEmpty() }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {

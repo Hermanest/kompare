@@ -24,19 +24,19 @@ fun SplitView(
         horizontalArrangement = Arrangement.SpaceAround,
         modifier = modifier
     ) {
-        items(group.size) { index ->
+        items(group.combinedComparisons.size) { index ->
             Card(
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxSize()
             ) {
-                val path = group.comparisons[index].path
+                val path = group.combinedComparisons[index].path
 
                 ImagePanel(
                     modifier = Modifier,
                     index = index,
                     group = group,
-                    match = if (index > 0) group.comparisons[index].percentage else -1.0,
+                    match = if (index > 0) group.combinedComparisons[index].percentage else -1.0,
                     onDelete = { onDelete(path) }
                 )
             }

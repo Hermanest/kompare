@@ -2,17 +2,16 @@ package core
 
 class RelativeComparisonGroup(
     mainPath: String,
-    otherComparisons: List<RelativeComparison>,
+    val otherComparisons: List<RelativeComparison>,
     val parentGroup: ComparisonGroup
 ) {
-    val comparisons = listOf(RelativeComparison(mainPath, 1.0)) + otherComparisons
-    val size: Int get() = comparisons.size
-    val main = comparisons.first()
+    val main = RelativeComparison(mainPath, 1.0)
+    val combinedComparisons = listOf(main) + otherComparisons
     
     fun withThreshold(threshold: Double): RelativeComparisonGroup {
         return RelativeComparisonGroup(
             main.path,
-            comparisons.filter { it.similarity >= threshold },
+            otherComparisons.filter { it.similarity >= threshold },
             parentGroup
         )
     }

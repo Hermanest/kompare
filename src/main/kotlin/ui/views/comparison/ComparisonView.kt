@@ -7,6 +7,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import core.Comparison
 import core.ComparisonGroup
@@ -20,13 +22,14 @@ fun ComparisonView(
     comparisons: List<ComparisonGroup>,
     selectedComparison: ComparisonGroup?,
     onSelectComparison: (ComparisonGroup) -> Unit,
-    onDeleteComparison: (ComparisonGroup, String) -> Unit
+    onDeleteComparison: (ComparisonGroup, String) -> Unit,
+    onFinish: () -> Unit
 ) {
     var filterThreshold by remember { mutableStateOf(startData.baseThreshold) }
     var isParamsDialogOpen by remember { mutableStateOf(false) }
 
     val comparisonsKey = comparisons.stableKey()
-    
+
     val relativeComparisons = remember(comparisonsKey) {
         comparisons.associateWith { it.getComparisons() }
     }
@@ -38,7 +41,7 @@ fun ComparisonView(
             null
         }
     }
-    
+
     val filteredComparisons = remember(comparisonsKey, filterThreshold) {
         val threshold = filterThreshold.toDouble()
 
@@ -67,30 +70,59 @@ fun ComparisonView(
                     }
                 )
             }
-            Text(
-                "Results",
-                style = MaterialTheme.typography.titleLarge,
-            )
+
+            Button(
+                onClick = onFinish,
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Text("Back")
+            }
+
             Button(
                 onClick = { isParamsDialogOpen = true },
                 shape = MaterialTheme.shapes.medium
             ) {
-                Text("View Settings")
+                Text("Filters")
             }
         }
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
-                .padding(10.dp)
+                .weight(1f),
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            Column(
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                val notEmpty = filteredComparisons.isNotEmpty()
+
+                if (notEmpty && relativeSelectedComparison != null) {
+                    SplitView(
+                        modifier = Modifier.fillMaxSize(),
+                        relativeSelectedComparison,
+                        onDelete = {
+                            onDeleteComparison(relativeSelectedComparison.parentGroup, it)
+                        }
+                    )
+                } else {
+                    Text(
+                        text = if (notEmpty) "Select something fist" else "Nothing to show",
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
             if (comparisons.size > 1) {
-                Column(
-                    modifier = Modifier
-                        .width(300.dp)
-                        .padding(end = 10.dp)
-                ) {
-                    LazyColumn {
+                Column(modifier = Modifier.width(300.dp)) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 10.dp)
+                            .padding(top = 4.dp)
+                    ) {
                         items(filteredComparisons.size) { i ->
                             val comparison = filteredComparisons[i]
 
@@ -102,21 +134,21 @@ fun ComparisonView(
                             }
                         }
                     }
-                }
-            }
 
-            if (filteredComparisons.isNotEmpty()) {
-                if (relativeSelectedComparison != null) {
-                    SplitView(
-                        modifier = Modifier.weight(1f),
-                        relativeSelectedComparison,
-                        onDelete = {
-                            onDeleteComparison(relativeSelectedComparison.parentGroup, it)
-                        }
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 6.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Showing ${filteredComparisons.size} results out of ${relativeComparisons.size}",
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                    }
                 }
-            } else {
-                Text("Nothing to show")
             }
         }
     }

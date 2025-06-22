@@ -121,6 +121,9 @@ fun App() {
                     
                     refreshComparisons()
                 }
+            },
+            onFinish = {
+                currentView = AppView.Start
             }
         )
     }

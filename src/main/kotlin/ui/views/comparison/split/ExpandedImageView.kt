@@ -31,7 +31,7 @@ import ui.components.ImageViewerState
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun ExpandedViewDialog(
+fun ExpandedImageView(
     bitmap: ImageBitmap,
     path: String,
     onClose: () -> Unit,

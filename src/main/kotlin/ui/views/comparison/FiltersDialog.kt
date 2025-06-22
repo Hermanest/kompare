@@ -18,7 +18,7 @@ import ui.ComparisonStartData
 import kotlin.math.round
 
 @Composable
-fun ViewParamsDialog(
+fun FiltersDialog(
     startData: ComparisonStartData,
     currentThreshold: Float,
     onDismiss: () -> Unit,

@@ -7,13 +7,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import core.Comparison
 import core.ComparisonGroup
 import ui.ComparisonStartData
-import ui.views.comparison.split.SplitView
+import ui.views.comparison.split.GroupView
 import utils.stableKey
 
 @Composable
@@ -60,7 +58,7 @@ fun ComparisonView(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (isParamsDialogOpen) {
-                ViewParamsDialog(
+                FiltersDialog(
                     startData = startData,
                     currentThreshold = filterThreshold,
                     onDismiss = { isParamsDialogOpen = false },
@@ -100,7 +98,7 @@ fun ComparisonView(
                 val notEmpty = filteredComparisons.isNotEmpty()
 
                 if (notEmpty && relativeSelectedComparison != null) {
-                    SplitView(
+                    GroupView(
                         modifier = Modifier.fillMaxSize(),
                         relativeSelectedComparison,
                         onDelete = {

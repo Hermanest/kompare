@@ -14,7 +14,7 @@ import core.RelativeComparisonGroup
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SplitView(
+fun GroupView(
     modifier: Modifier = Modifier,
     group: RelativeComparisonGroup,
     onDelete: (String) -> Unit,

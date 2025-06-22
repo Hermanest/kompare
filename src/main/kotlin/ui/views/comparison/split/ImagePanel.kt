@@ -38,7 +38,7 @@ fun ImagePanel(
             val previewPath = group.combinedComparisons[previewIndex].path
             val previewBitmap = previewPath.getBitmapFromStorage()
 
-            ExpandedViewDialog(
+            ExpandedImageView(
                 bitmap = previewBitmap,
                 path = previewPath,
                 onClose = { dialogOpen = false },
@@ -72,7 +72,7 @@ fun ImagePanel(
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold,
         )
-        ImageInfoPanel(
+        ImageDetailsPanel(
             path = path,
             bitmap = bitmap,
             modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),

@@ -1,7 +1,6 @@
 package ui.views.comparison.split
 
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -10,19 +9,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.TextLayoutResult
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import utils.clamp
 import utils.getFileSize
 import utils.showInExplorer
 import kotlin.io.path.Path
 
 @Composable
-fun ImageInfoPanel(
+fun ImageDetailsPanel(
     path: String,
     bitmap: ImageBitmap,
     modifier: Modifier = Modifier,

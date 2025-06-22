@@ -12,6 +12,7 @@ import core.Comparison
 import core.ComparisonGroup
 import ui.ComparisonStartData
 import ui.views.comparison.split.SplitView
+import utils.stableKey
 
 @Composable
 fun ComparisonView(
@@ -19,24 +20,26 @@ fun ComparisonView(
     comparisons: List<ComparisonGroup>,
     selectedComparison: ComparisonGroup?,
     onSelectComparison: (ComparisonGroup) -> Unit,
-    onDeleteComparison: (ComparisonGroup, Comparison, String) -> Unit
+    onDeleteComparison: (ComparisonGroup, String) -> Unit
 ) {
     var filterThreshold by remember { mutableStateOf(startData.baseThreshold) }
     var isParamsDialogOpen by remember { mutableStateOf(false) }
 
-    val relativeComparisons = remember(comparisons) {
+    val comparisonsKey = comparisons.stableKey()
+    
+    val relativeComparisons = remember(comparisonsKey) {
         comparisons.associateWith { it.getComparisons() }
     }
 
-    val relativeSelectedComparison = remember(selectedComparison) {
+    val relativeSelectedComparison = remember(selectedComparison, comparisonsKey) {
         if (selectedComparison != null) {
             relativeComparisons[selectedComparison]
         } else {
             null
         }
     }
-
-    val filteredComparisons = remember(comparisons, filterThreshold) {
+    
+    val filteredComparisons = remember(comparisonsKey, filterThreshold) {
         val threshold = filterThreshold.toDouble()
 
         relativeComparisons.values
@@ -90,7 +93,7 @@ fun ComparisonView(
                     LazyColumn {
                         items(filteredComparisons.size) { i ->
                             val comparison = filteredComparisons[i]
-                            
+
                             ComparisonListItem(
                                 comparison,
                                 isSelected = comparison == relativeSelectedComparison
@@ -107,9 +110,8 @@ fun ComparisonView(
                     SplitView(
                         modifier = Modifier.weight(1f),
                         relativeSelectedComparison,
-                        //TODO: fix deletion
-                        onDelete = { 
-                            onDeleteComparison(relativeSelectedComparison.parentGroup, Comparison("", "", 0.0), it) 
+                        onDelete = {
+                            onDeleteComparison(relativeSelectedComparison.parentGroup, it)
                         }
                     )
                 }

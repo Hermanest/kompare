@@ -20,7 +20,7 @@ enum class AppView {
 @Composable
 fun App() {
     var currentView by remember { mutableStateOf(AppView.Start) }
-    var comparisons by remember { mutableStateOf(mutableListOf<ComparisonGroup>()) }
+    val comparisons = remember { mutableStateListOf<ComparisonGroup>() }
     var selectedComparison by remember { mutableStateOf<ComparisonGroup?>(null) }
     var startData by remember { mutableStateOf<ComparisonStartData?>(null) }
 
@@ -30,7 +30,9 @@ fun App() {
 
     val processor = remember { ComparisonProcessor(SsimComparator) }
     
-    LaunchedEffect(comparisons) {
+    fun refreshComparisons() {
+        comparisons.sortBy { it.mainPath }
+        
         if (comparisons.size == 1) {
             selectedComparison = comparisons[0]
         }
@@ -61,7 +63,7 @@ fun App() {
                         }
                         // Analyze the whole directory
                         ActionType.Analyze -> {
-                            comparisons = processor.compare(
+                            val results = processor.compare(
                                 files,
                                 { stage ->
                                     message = stage
@@ -71,6 +73,9 @@ fun App() {
                                     totalFiles = total
                                 }
                             )
+
+                            comparisons.addAll(results)
+                            refreshComparisons()
                         }
                     }
                     println(comparisons.size)
@@ -90,13 +95,27 @@ fun App() {
             comparisons = comparisons,
             selectedComparison = selectedComparison,
             onSelectComparison = { selectedComparison = it },
-            onDeleteComparison = { group, comp, path ->
-                deleteFile(path)
-                println("Deleted $path")
+            onDeleteComparison = { group, path ->
+                if (!comparisons.remove(group)) {
+                    println("Failed to remove $path?")
+                } else {
+                    deleteFile(path)
+                    println("Deleted $path")
 
-                //comparisons.remove(comp)
-                if (selectedComparison == comp) {
-                    selectedComparison = null
+                    val newComparisons = group.comparisons.filter { it.path1 != path && it.path2 != path }
+                    val newGroup = ComparisonGroup(newComparisons)
+                    comparisons.add(newGroup)
+                    refreshComparisons()
+
+                    // Keep the same main path even it wasn't removed
+                    if (path != group.mainPath) {
+                        newGroup.setMainPath(group.mainPath)
+                    }
+
+                    // Keep the same group if it still has items
+                    if (selectedComparison == group) {
+                        selectedComparison = if (newComparisons.isEmpty()) null else newGroup
+                    }
                 }
             }
         )

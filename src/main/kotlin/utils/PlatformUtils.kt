@@ -6,11 +6,12 @@ import java.io.File
 
 fun getFileSize(path: String): String {
     val file = File(path)
-    val sizeInKB = file.length() / 1024
+    val sizeInKB = file.length() / 1024.0
+    
     return if (sizeInKB < 1024) {
-        "$sizeInKB KB"
+        String.format("%.2f KB", sizeInKB)
     } else {
-        "${sizeInKB / 1024} MB"
+        String.format("%.2f MB", sizeInKB / 1024.0)
     }
 }
 

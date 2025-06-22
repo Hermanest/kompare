@@ -14,14 +14,12 @@ class ComparisonGroup(val comparisons: List<Comparison>) {
 
     val size: Int get() = paths.size
 
-    fun setMainPath(index: Int) {
-        require(index in paths.indices) {
-            "Index $index out of bounds for paths of size ${paths.size}"
+    fun setMainPath(path: String) {
+        require(path in paths) {
+            "Path $path is not in the group"
         }
-        mainPath = paths[index]
+        mainPath = path
     }
-
-    fun getPathAt(index: Int): String = paths[index]
 
     fun getComparisons(anchorIndex: Int): RelativeComparisonGroup {
         return getComparisonsFor(paths[anchorIndex])

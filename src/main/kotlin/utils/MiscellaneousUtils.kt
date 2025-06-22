@@ -23,6 +23,10 @@ fun <T> T.pairedHash(other: T): Int {
     return first + second
 }
 
+fun <T> List<T>.stableKey(): Int {
+    return fold(0) { acc, item -> acc + item.hashCode() }
+}
+
 fun <T> T.clamp(min: T, max: T): T where T : Number, T : Comparable<T> {
     return when {
         this > max -> max

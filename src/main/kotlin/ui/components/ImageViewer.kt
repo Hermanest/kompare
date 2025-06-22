@@ -73,7 +73,7 @@ fun ImageViewer(
     }
 
     fun recalculateBounds(
-        posX: Float = st.posY,
+        posX: Float = st.posX,
         posY: Float = st.posY,
         scale: Float = st.scale
     ) {

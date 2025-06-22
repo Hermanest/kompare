@@ -29,10 +29,10 @@ fun App() {
     var message by remember { mutableStateOf("") }
 
     val processor = remember { ComparisonProcessor(SsimComparator) }
-    
+
     fun refreshComparisons() {
         comparisons.sortBy { it.mainPath }
-        
+
         if (comparisons.size == 1) {
             selectedComparison = comparisons[0]
         }
@@ -103,19 +103,23 @@ fun App() {
                     println("Deleted $path")
 
                     val newComparisons = group.comparisons.filter { it.path1 != path && it.path2 != path }
-                    val newGroup = ComparisonGroup(newComparisons)
-                    comparisons.add(newGroup)
+                    
+                    if (newComparisons.isNotEmpty()) {
+                        val newGroup = ComparisonGroup(newComparisons)
+                        comparisons.add(newGroup)
+
+                        // Keep the same main path even it wasn't removed
+                        if (path != group.mainPath) {
+                            newGroup.setMainPath(group.mainPath)
+                        }
+
+                        // Keep the same group if it still has items
+                        if (selectedComparison == group) {
+                            selectedComparison = if (newComparisons.isEmpty()) null else newGroup
+                        }
+                    }
+                    
                     refreshComparisons()
-
-                    // Keep the same main path even it wasn't removed
-                    if (path != group.mainPath) {
-                        newGroup.setMainPath(group.mainPath)
-                    }
-
-                    // Keep the same group if it still has items
-                    if (selectedComparison == group) {
-                        selectedComparison = if (newComparisons.isEmpty()) null else newGroup
-                    }
                 }
             }
         )

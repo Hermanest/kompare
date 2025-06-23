@@ -27,7 +27,7 @@ fun LoadingView(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp), 
+            .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -36,20 +36,20 @@ fun LoadingView(
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center
         )
-        
+
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             LinearProgressIndicator(
-                progress = loaded / total.toFloat(),
+                progress = { if (total == 0) 0f else loaded / total.toFloat() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp))
+                    .clip(RoundedCornerShape(4.dp)),
             )
-            
+
             Text(
                 text = "$loaded / $total",
                 style = MaterialTheme.typography.bodyMedium,

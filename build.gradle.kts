@@ -4,7 +4,7 @@ plugins {
     kotlin("jvm")
     kotlin("plugin.serialization") version KotlinVersion.CURRENT.toString()
     
-    id("org.jetbrains.compose")
+    id("org.jetbrains.compose") version "1.8.2"
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
@@ -18,13 +18,11 @@ repositories {
 }
 
 dependencies {
-    // Note, if you develop a library, you should use compose.desktop.common.
-    // compose.desktop.currentOs should be used in launcher-sourceSet
-    // (in a separate module for demo project and in testMain).
-    // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
+    implementation(compose.material3)
+    implementation(compose.materialIconsExtended)
+    
     implementation("org.openpnp:opencv:4.9.0-0")
-    implementation("org.jetbrains.compose.material3:material3-desktop:1.2.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     
     testImplementation("org.jetbrains.kotlin:kotlin-test")

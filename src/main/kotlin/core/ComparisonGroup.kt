@@ -18,15 +18,20 @@ class ComparisonGroup(val comparisons: List<Comparison>) {
         require(path in paths) {
             "Path $path is not in the group"
         }
+        
         mainPath = path
     }
-
-    fun getComparisons(anchorIndex: Int): RelativeComparisonGroup {
-        return getComparisonsFor(paths[anchorIndex])
-    }
-
+    
     fun getComparisons(): RelativeComparisonGroup {
         return getComparisonsFor(mainPath)
+    }
+    
+    fun getComparisons(path: String): RelativeComparisonGroup {
+        require(path in paths) {
+            "Path $path is not in the group"
+        }
+        
+        return getComparisonsFor(path)
     }
 
     private fun getComparisonsFor(anchor: String): RelativeComparisonGroup {

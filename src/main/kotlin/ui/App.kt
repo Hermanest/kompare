@@ -103,7 +103,7 @@ fun App() {
                     println("Deleted $path")
 
                     val newComparisons = group.comparisons.filter { it.path1 != path && it.path2 != path }
-                    
+
                     if (newComparisons.isNotEmpty()) {
                         val newGroup = ComparisonGroup(newComparisons)
                         comparisons.add(newGroup)
@@ -118,7 +118,7 @@ fun App() {
                             selectedComparison = if (newComparisons.isEmpty()) null else newGroup
                         }
                     }
-                    
+
                     refreshComparisons()
                 }
             },

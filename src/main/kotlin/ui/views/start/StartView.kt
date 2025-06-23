@@ -8,6 +8,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Compare
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -21,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import ui.ActionType
 import ui.ComparisonStartData
 import utils.lerp
-
 
 @Composable
 fun StartView(onAction: (ComparisonStartData) -> Unit) {
@@ -46,12 +49,12 @@ fun StartView(onAction: (ComparisonStartData) -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(26.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            ActionButton("Find", "attach.svg") {
+            ActionButton("Find", Icons.Rounded.Search) {
                 action = ActionType.Find
                 settingsShown = true
             }
 
-            ActionButton("Analyze", "compare.svg") {
+            ActionButton("Analyze", Icons.Rounded.Compare) {
                 action = ActionType.Analyze
                 settingsShown = true
             }

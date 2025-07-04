@@ -3,12 +3,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import nu.pattern.OpenCV
+import platform.platform
 import ui.App
 
-
 fun main() {
-    loadPlatformDependencies()
-    applyPlatformTweaks()
+    OpenCV.loadShared()
+    platform.load()
     
     application {
         Window(

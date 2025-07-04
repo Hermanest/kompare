@@ -14,8 +14,8 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import utils.getFileSize
-import utils.showInExplorer
 import kotlin.io.path.Path
+import platform.platform
 
 @Composable
 fun ImageDetailsPanel(
@@ -87,7 +87,7 @@ fun ImageDetailsPanel(
             }
             Button(
                 shape = MaterialTheme.shapes.medium,
-                onClick = { showInExplorer(path) }
+                onClick = { platform.showFileInExplorer(path) }
             ) {
                 Text(
                     text = "Show",

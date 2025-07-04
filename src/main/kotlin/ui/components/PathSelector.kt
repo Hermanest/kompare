@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import utils.openFilePicker
+import platform.platform
 
 @Composable
 fun PathSelector(directory: Boolean, onSelect: (String) -> Unit) {
@@ -42,7 +42,7 @@ fun PathSelector(directory: Boolean, onSelect: (String) -> Unit) {
 
             Button(
                 onClick = {
-                    path = openFilePicker(directory) ?: return@Button
+                    path = platform.openFilePicker(directory) ?: return@Button
                     onSelect(path)
                 },
                 modifier = Modifier.size(40.dp),

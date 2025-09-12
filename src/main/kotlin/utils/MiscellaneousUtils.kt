@@ -1,5 +1,8 @@
 package utils
 
+import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
 import org.opencv.core.Mat
 import kotlin.math.roundToInt
 
@@ -25,6 +28,15 @@ fun <T> T.pairedHash(other: T): Int {
 
 fun <T> List<T>.stableKey(): Int {
     return fold(0) { acc, item -> acc + item.hashCode() }
+}
+
+operator fun Color.times(factor: Float): Color {
+    return copy(
+        alpha,
+        red * factor, 
+        green * factor,
+        blue * factor
+    )
 }
 
 fun <T> T.clamp(min: T, max: T): T where T : Number, T : Comparable<T> {

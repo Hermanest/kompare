@@ -1,17 +1,17 @@
 package ui
 
+import LocalComparatorFactory
 import androidx.compose.runtime.*
+import core.AnalyzeResult
 import core.ComparisonGroup
-import core.ComparisonProcessor
-import core.comparators.SsimComparator
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import core.FindMatchResult
+import core.IComparisonProcessor
+import core.IComparisonResult
 import kotlinx.coroutines.launch
 import ui.views.LoadingView
 import ui.views.comparison.ComparisonView
 import ui.views.start.StartView
 import utils.deleteFile
-import java.io.File
 
 enum class AppView {
     Start, Loading, Comparison
@@ -22,14 +22,12 @@ fun App() {
     var currentView by remember { mutableStateOf(AppView.Start) }
     val comparisons = remember { mutableStateListOf<ComparisonGroup>() }
     var selectedComparison by remember { mutableStateOf<ComparisonGroup?>(null) }
-    var startData by remember { mutableStateOf<ComparisonStartData?>(null) }
 
-    var totalFiles by remember { mutableStateOf(0) }
-    var progress by remember { mutableStateOf(0) }
-    var message by remember { mutableStateOf("") }
-
-    val processor = remember { ComparisonProcessor(SsimComparator) }
-
+    val comparatorFactory = LocalComparatorFactory.current
+    var comparisonProcessor by remember { mutableStateOf<IComparisonProcessor?>(null) }
+    
+    val coroutineScope = rememberCoroutineScope()
+    
     fun refreshComparisons() {
         comparisons.sortBy { it.mainPath }
 
@@ -41,57 +39,33 @@ fun App() {
     when (currentView) {
         AppView.Start -> StartView(
             onAction = { data ->
-                startData = data
-                currentView = AppView.Loading
+                comparisonProcessor = comparatorFactory.createProcessor(data)
 
-                val files = File(data.directoryPath)
-                    .listFiles()
-                    ?.filter {
-                        it.isFile && when (it.extension) {
-                            "png", "jpg", "jpeg" -> true
-                            else -> false
-                        }
+                coroutineScope.launch {
+                    currentView = AppView.Loading
+                    
+                    comparisonProcessor!!.start()
+                    comparisonProcessor!!.join()
+                    
+                    comparisons.clear()
+                    
+                    val result = comparisonProcessor!!.result
+                    when (result) {
+                        is AnalyzeResult -> comparisons.addAll(result.results)
+                        is FindMatchResult -> comparisons.addAll(result.results)
+                        null -> {}
                     }
-                    ?.map { it.path } ?: emptyList()
 
-                CoroutineScope(Dispatchers.IO).launch {
-                    message = "Analyzing"
-                    when (data.action) {
-                        // Find duplicates for the file
-                        ActionType.Find -> {
-
-                        }
-                        // Analyze the whole directory
-                        ActionType.Analyze -> {
-                            val results = processor.compare(
-                                files,
-                                { stage ->
-                                    message = stage
-                                },
-                                { current, total ->
-                                    progress = current
-                                    totalFiles = total
-                                }
-                            )
-
-                            comparisons.addAll(results)
-                            refreshComparisons()
-                        }
-                    }
-                    println(comparisons.size)
                     currentView = AppView.Comparison
                 }
             }
         )
 
         AppView.Loading -> LoadingView(
-            progress,
-            totalFiles,
-            message
+            processor = comparisonProcessor!!,
         )
 
         AppView.Comparison -> ComparisonView(
-            startData = startData!!,
             comparisons = comparisons,
             selectedComparison = selectedComparison,
             onSelectComparison = { selectedComparison = it },

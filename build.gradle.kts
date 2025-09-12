@@ -25,6 +25,9 @@ dependencies {
     implementation("org.openpnp:opencv:4.9.0-0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     
+    implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
+    implementation("org.slf4j:slf4j-simple:2.0.3")
+    
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation(kotlin("test"))
 }

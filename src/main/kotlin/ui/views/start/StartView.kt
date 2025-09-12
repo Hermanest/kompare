@@ -2,35 +2,27 @@ package ui.views.start
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Compare
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
-import ui.ActionType
-import ui.ComparisonStartData
+import core.IComparisonInitData
 import utils.lerp
 
+private typealias SettingsPanel = @Composable (onCancel: () -> Unit, onAction: (IComparisonInitData) -> Unit) -> Unit
+
 @Composable
-fun StartView(onAction: (ComparisonStartData) -> Unit) {
-    var action by remember { mutableStateOf(ActionType.Find) }
+fun StartView(onAction: (IComparisonInitData) -> Unit) {
+    var settingsView by remember { mutableStateOf<SettingsPanel?>(null) }
     var settingsShown by remember { mutableStateOf(false) }
     val progress = remember { Animatable(0f) }
+
+    val onCancel = remember { { settingsShown = false } }
 
     LaunchedEffect(settingsShown) {
         progress.animateTo(
@@ -50,12 +42,12 @@ fun StartView(onAction: (ComparisonStartData) -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             ActionButton("Find", Icons.Rounded.Search) {
-                action = ActionType.Find
+                settingsView = null
                 settingsShown = true
             }
 
             ActionButton("Analyze", Icons.Rounded.Compare) {
-                action = ActionType.Analyze
+                settingsView = { x, y -> AnalyzeSettingsPanel(x, y) }
                 settingsShown = true
             }
         }
@@ -67,16 +59,7 @@ fun StartView(onAction: (ComparisonStartData) -> Unit) {
                     .alpha(progress.value.lerp(0f, 1f))
                     .offset(x = progress.value.lerp(300f, 0f).dp)
             ) {
-                StartSettingsPanel(
-                    modifier = Modifier.fillMaxSize(),
-                    actionType = action,
-                    onCancel = { settingsShown = false },
-                    onProceed = {
-                        it.action = action
-                        onAction(it)
-                        settingsShown = false
-                    }
-                )
+                settingsView!!(onCancel, onAction)
             }
         }
     }

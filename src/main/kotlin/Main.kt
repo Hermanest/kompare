@@ -10,15 +10,17 @@ import ui.App
 fun main() {
     OpenCV.loadShared()
     platform.load()
-    
+
     application {
-        Window(
-            title = "Kompare",
-            onCloseRequest = ::exitApplication
-        ) {
-            MaterialTheme(colorScheme = darkColorScheme()) {
-                Surface(color = MaterialTheme.colorScheme.background) {
-                    App()
+        ProvideAppContext {
+            Window(
+                title = "Kompare",
+                onCloseRequest = ::exitApplication
+            ) {
+                MaterialTheme(colorScheme = darkColorScheme()) {
+                    Surface(color = MaterialTheme.colorScheme.background) {
+                        App()
+                    }
                 }
             }
         }

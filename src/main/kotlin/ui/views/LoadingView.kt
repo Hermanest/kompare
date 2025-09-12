@@ -11,19 +11,24 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import core.IComparisonProcessor
 
 @Composable
 fun LoadingView(
-    loaded: Int,
-    total: Int,
-    message: String,
+    processor: IComparisonProcessor,
     modifier: Modifier = Modifier
 ) {
+    val stage by processor.stage.collectAsState()
+    val total by processor.total.collectAsState()
+    val handled by processor.handled.collectAsState()
+    
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -32,7 +37,7 @@ fun LoadingView(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = message,
+            text = stage,
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center
         )
@@ -43,7 +48,7 @@ fun LoadingView(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             LinearProgressIndicator(
-                progress = { if (total == 0) 0f else loaded / total.toFloat() },
+                progress = { if (total == 0) 0f else handled / total.toFloat() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp)
@@ -51,7 +56,7 @@ fun LoadingView(
             )
 
             Text(
-                text = "$loaded / $total",
+                text = "$handled / $total",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary
             )

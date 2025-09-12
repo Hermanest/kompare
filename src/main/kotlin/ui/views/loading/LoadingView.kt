@@ -1,16 +1,14 @@
-package ui.views
+package ui.views.loading
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import LocalNavController
+import LocalProcessorProvider
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -18,19 +16,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import core.IComparisonProcessor
+import kotlinx.serialization.Serializable
+import ui.views.comparison.ComparisonRoute
+
+@Serializable
+object LoadingRoute
 
 @Composable
-fun LoadingView(
-    processor: IComparisonProcessor,
-    modifier: Modifier = Modifier
-) {
+fun LoadingView() {
+    val processor = LocalProcessorProvider.current.processor
+    val navController = LocalNavController.current
+
+    LaunchedEffect(processor) {
+        processor.join()
+        navController.navigate(ComparisonRoute)
+    }
+
     val stage by processor.stage.collectAsState()
     val total by processor.total.collectAsState()
     val handled by processor.handled.collectAsState()
-    
+
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),

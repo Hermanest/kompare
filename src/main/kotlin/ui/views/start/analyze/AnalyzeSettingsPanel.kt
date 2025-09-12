@@ -1,4 +1,4 @@
-package ui.views.start
+package ui.views.start.analyze
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

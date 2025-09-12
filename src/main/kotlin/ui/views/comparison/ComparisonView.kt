@@ -1,5 +1,7 @@
 package ui.views.comparison
 
+import LocalNavController
+import LocalProcessorProvider
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -7,18 +9,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import core.AnalyzeResult
 import core.ComparisonGroup
+import kotlinx.serialization.Serializable
 import ui.views.comparison.split.GroupView
+import ui.views.start.StartRoute
 import utils.stableKey
+
+@Serializable
+object ComparisonRoute
 
 @Composable
 fun ComparisonView(
-    comparisons: List<ComparisonGroup>,
-    selectedComparison: ComparisonGroup?,
-    onSelectComparison: (ComparisonGroup) -> Unit,
-    onDeleteComparison: (ComparisonGroup, String) -> Unit,
-    onFinish: () -> Unit
+    onDeleteComparison: (ComparisonGroup, String) -> Unit
 ) {
+    val navController = LocalNavController.current
+    val result = LocalProcessorProvider.current.processor.result as AnalyzeResult
+
+    val comparisons = result.results
+    var selectedComparison by remember { mutableStateOf<ComparisonGroup?>(null) }
     var filterThreshold by remember { mutableStateOf(0.5f) }
     val comparisonsKey = comparisons.stableKey()
 
@@ -50,7 +59,9 @@ fun ComparisonView(
 
         ComparisonViewToolbar(
             listWidth = actualListWidth.dp,
-            onBack = {},
+            onBack = {
+                navController.navigate(StartRoute)
+            },
             onListWidthChange = {
                 listWidth -= it
             },
@@ -96,7 +107,7 @@ fun ComparisonView(
                     comparisons = filteredComparisons,
                     unfilteredComparisonsSize = relativeComparisons.size,
                     selectedComparison = relativeSelectedComparison,
-                    onSelectComparison = { onSelectComparison(it.parentGroup) }
+                    onSelectComparison = { selectedComparison = it.parentGroup }
                 )
             }
         }

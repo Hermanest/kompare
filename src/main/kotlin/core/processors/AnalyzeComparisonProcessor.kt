@@ -30,9 +30,9 @@ class AnalyzeComparisonProcessor(
     override val stage: StateFlow<String> get() = _stage
     override val result: IComparisonResult? get() = _result
 
-    private var _totalProgress = MutableStateFlow(0)
-    private var _handledProgress = MutableStateFlow(0)
-    private var _stage = MutableStateFlow("")
+    private val _totalProgress = MutableStateFlow(0)
+    private val _handledProgress = MutableStateFlow(0)
+    private val _stage = MutableStateFlow("")
     private var _result: IComparisonResult? = null
 
     private var _job: Job? = null
@@ -57,6 +57,7 @@ class AnalyzeComparisonProcessor(
             val mutex = Mutex()
 
             _stage.value = "Preprocessing"
+            _totalProgress.value = paths.size
 
             for (path in paths) {
                 launch {

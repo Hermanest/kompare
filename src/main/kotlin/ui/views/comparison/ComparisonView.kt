@@ -14,6 +14,7 @@ import core.ComparisonGroup
 import kotlinx.serialization.Serializable
 import ui.views.comparison.split.GroupView
 import ui.views.start.StartRoute
+import ui.views.start.StartView
 import utils.stableKey
 
 @Serializable
@@ -60,7 +61,7 @@ fun ComparisonView(
         ComparisonViewToolbar(
             listWidth = actualListWidth.dp,
             onBack = {
-                navController.navigate(StartRoute)
+                navController.popBackStack(StartRoute, false)
             },
             onListWidthChange = {
                 listWidth -= it

@@ -1,6 +1,10 @@
 package ui
 
 import LocalNavController
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -17,20 +21,50 @@ import ui.views.start.analyze.AnalyzeSettingsView
 fun App() {
     val navController = LocalNavController.current
     
-    NavHost(navController = navController, startDestination = StartRoute) {
+    val duration = 300
+    val easing = FastOutSlowInEasing
+
+    NavHost(
+        navController = navController,
+        startDestination = StartRoute,
+        enterTransition = {
+            slideInHorizontally(
+                initialOffsetX = { it },
+                animationSpec = tween(duration, easing = easing)
+            )
+        },
+        exitTransition = {
+            slideOutHorizontally(
+                targetOffsetX = { -it },
+                animationSpec = tween(duration, easing = easing)
+            )
+        },
+        popEnterTransition = {
+            slideInHorizontally(
+                initialOffsetX = { -it },
+                animationSpec = tween(duration, easing = easing)
+            )
+        },
+        popExitTransition = {
+            slideOutHorizontally(
+                targetOffsetX = { it },
+                animationSpec = tween(duration, easing = easing)
+            )
+        },
+    ) {
         composable<StartRoute> {
             StartView()
         }
-        
-        composable<AnalyzeSettingsRoute> { 
+
+        composable<AnalyzeSettingsRoute> {
             AnalyzeSettingsView()
         }
-        
+
         composable<LoadingRoute> {
             LoadingView()
         }
-        
-        composable<ComparisonRoute> {  
+
+        composable<ComparisonRoute> {
             ComparisonView { group, path -> }
         }
     }

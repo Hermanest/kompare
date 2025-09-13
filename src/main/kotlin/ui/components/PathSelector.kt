@@ -1,35 +1,73 @@
 package ui.components
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.onClick
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AttachFile
+import androidx.compose.material.icons.rounded.FolderOpen
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import platform.platform
 
+@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
-fun PathSelector(directory: Boolean, onSelect: (String) -> Unit) {
-    var path by remember { mutableStateOf("Choose a " + if (directory) "directory" else "file") }
+fun PathSelector(
+    borderStroke: BorderStroke = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
+    onSelect: (String) -> Unit
+) {
+    var path by remember { mutableStateOf("Choose a directory") }
+    var focused by remember { mutableStateOf(false) }
+
+    val elevation = animateDpAsState(if (focused) 2.dp else 0.dp)
+    val shape = RoundedCornerShape(40.dp)
 
     Surface(
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surfaceVariant
+        modifier = Modifier
+            .border(borderStroke, shape)
+            .fillMaxWidth()
+            .height(200.dp)
+            .onClick {
+                path = platform.openFilePicker(true) ?: return@onClick
+                onSelect(path)
+            }
+            .onPointerEvent(PointerEventType.Enter) {
+                focused = true
+            }
+            .onPointerEvent(PointerEventType.Exit) {
+                focused = false
+            },
+        shape = shape,
+        color = MaterialTheme.colorScheme.background,
+        tonalElevation = elevation.value
     ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(
-                start = 10.dp,
-                top = 6.dp,
-                bottom = 6.dp,
-                end = 6.dp
-            ).width(250.dp)
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
+            modifier = Modifier.fillMaxSize().padding(20.dp)
         ) {
+            Icon(
+                imageVector = Icons.Rounded.FolderOpen,
+                contentDescription = null,
+                modifier = Modifier.size(60.dp)
+            )
+
             Text(
                 path,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -37,24 +75,7 @@ fun PathSelector(directory: Boolean, onSelect: (String) -> Unit) {
                 softWrap = false,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f).padding(end = 8.dp)
             )
-
-            Button(
-                onClick = {
-                    path = platform.openFilePicker(directory) ?: return@Button
-                    onSelect(path)
-                },
-                modifier = Modifier.size(40.dp),
-                shape = MaterialTheme.shapes.medium,
-                contentPadding = PaddingValues(6.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.AttachFile,
-                    contentDescription = null,
-                    modifier = Modifier.size(40.dp).fillMaxSize()
-                )
-            }
         }
     }
 }

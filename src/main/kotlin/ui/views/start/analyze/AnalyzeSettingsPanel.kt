@@ -1,33 +1,27 @@
 package ui.views.start.analyze
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Filter
+import androidx.compose.material.icons.filled.ImageAspectRatio
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import core.AnalyzeInitData
 import core.IComparisonInitData
 import ui.components.PathSelector
+import ui.components.SliderSetting
+import kotlin.math.round
 
 @Composable
 fun AnalyzeSettingsPanel(onCancel: () -> Unit, onProceed: (IComparisonInitData) -> Unit) {
     var directoryPath by remember { mutableStateOf<String?>(null) }
     var filterOffThreshold by remember { mutableStateOf(50f) }
+    var imageResolution by remember { mutableStateOf(128f) }
 
     val canProceed = directoryPath != null
 
@@ -38,22 +32,32 @@ fun AnalyzeSettingsPanel(onCancel: () -> Unit, onProceed: (IComparisonInitData) 
             verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
         ) {
             Column(
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.width(400.dp)
             ) {
-                PathSelector(true) {
+                PathSelector {
                     directoryPath = it
                 }
 
-                Card(shape = MaterialTheme.shapes.large) {
-                    Column(modifier = Modifier.padding(10.dp)) {
-                        Text("Base threshold ${filterOffThreshold.toInt()}%")
-                        Slider(
-                            modifier = Modifier.width(300.dp),
-                            value = filterOffThreshold,
-                            onValueChange = { filterOffThreshold = it / 100f },
-                            valueRange = 0f..100f
-                        )
-                    }
+                Column(modifier = Modifier.padding(top = 10.dp)) {
+                    SliderSetting(
+                        imageVector = Icons.Filled.Filter,
+                        label = "Comparison threshold",
+                        formatValue = { "${it.toInt()}%" },
+                        value = filterOffThreshold,
+                        onValueChange = { filterOffThreshold = it },
+                        valueRange = 0f..100f
+                    )
+
+                    SliderSetting(
+                        imageVector = Icons.Filled.ImageAspectRatio,
+                        label = "Image resolution",
+                        value = imageResolution,
+                        formatValue = { "${it}px" },
+                        onValueChange = { imageResolution = round(it) },
+                        valueRange = 128f..1024f,
+                        steps = (1024 - 128) / 64 - 1
+                    )
                 }
             }
 
@@ -69,9 +73,9 @@ fun AnalyzeSettingsPanel(onCancel: () -> Unit, onProceed: (IComparisonInitData) 
                     onClick = {
                         val data = AnalyzeInitData(
                             directoryPath!!,
-                            filterOffThreshold
+                            filterOffThreshold / 100f
                         )
-                        
+
                         onProceed(data)
                     },
                     enabled = canProceed

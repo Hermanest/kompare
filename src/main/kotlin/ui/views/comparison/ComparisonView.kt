@@ -34,25 +34,30 @@ fun ComparisonView() {
 
     var selectedComparison by remember { mutableStateOf<ComparisonGroup?>(null) }
     val filteredComparisons = remember { mutableStateListOf<ComparisonGroup>() }
+
     var filterOffThreshold by remember { mutableStateOf(initData.filterOffThreshold) }
+    var filterText by remember { mutableStateOf("") }
 
     var settingsOpened by remember { mutableStateOf(false) }
 
     // TODO: create a shared data source
-    LaunchedEffect(comparisons, filterOffThreshold) {
+    LaunchedEffect(comparisons, filterOffThreshold, filterText) {
         // Notifies the collection only once at the end of scope
         Snapshot.withoutReadObservation {
             filteredComparisons.clear()
 
             comparisons.forEach {
-                it.relative.setThreshold(filterOffThreshold)
+                it.relative.filterBy(
+                    threshold = filterOffThreshold,
+                    phrase = filterText
+                )
 
-                if (it.relative.otherComparisons.isNotEmpty()) {
+                if (it.relative.combinedComparisons.isNotEmpty()) {
                     filteredComparisons.add(it)
                 }
             }
         }
-        
+
         if (selectedComparison?.relative?.combinedComparisons?.isEmpty() ?: false) {
             selectedComparison = null
         }
@@ -88,6 +93,9 @@ fun ComparisonView() {
             },
             onOpenSettings = {
                 settingsOpened = true
+            },
+            onSearch = {
+                filterText = it
             }
         )
 

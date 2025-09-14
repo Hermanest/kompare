@@ -25,6 +25,7 @@ fun ComparisonViewToolbar(
     onListWidthStartedToChange: () -> Unit,
     onSweepDelete: () -> Unit,
     onOpenSettings: () -> Unit,
+    onSearch: (String) -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -83,7 +84,7 @@ fun ComparisonViewToolbar(
 
         Row(
             modifier = Modifier
-                .width(listWidth - 14.dp)
+                .width(listWidth)
                 .padding(end = 12.dp)
                 .fillMaxHeight(),
             verticalAlignment = Alignment.CenterVertically
@@ -92,7 +93,10 @@ fun ComparisonViewToolbar(
 
             ButtonTextField(
                 value = text,
-                onValueChange = { text = it },
+                onValueChange = {
+                    text = it
+                    onSearch(it)
+                },
                 icon = Icons.Default.Search
             )
         }

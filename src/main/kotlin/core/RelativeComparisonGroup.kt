@@ -13,16 +13,22 @@ class RelativeComparisonGroup(
         get() = _filteredComparisons.emptyOr { it }
 
     val otherComparisons: List<RelativeComparison>
-        get() = _filteredComparisons.emptyOr { it.subList(1, it.size - 1) }
+        get() = _filteredComparisons.emptyOr { it.subList(1, it.size) }
 
-    fun setThreshold(threshold: Float) {
+    fun filterBy(threshold: Float = 0f, phrase: String = "") {
         _filteredComparisons.clear()
         _filteredComparisons.add(main)
 
         _comparisons.forEach {
-            if (it.percentage / 100 >= threshold) {
-                _filteredComparisons.add(it)
+            if (it.percentage / 100 < threshold) {
+                return@forEach
             }
+            
+            if (!it.path.contains(phrase)) {
+                return@forEach
+            }
+
+            _filteredComparisons.add(it)
         }
     }
 

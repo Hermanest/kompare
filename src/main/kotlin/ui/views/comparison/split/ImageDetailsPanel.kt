@@ -100,11 +100,14 @@ fun ImageDetailsPanel(
 
     if (showDialog) {
         DeleteConfirmationDialog(
+            singleFile = true,
             onConfirm = {
                 onDelete()
                 showDialog = false
             },
-            onDismiss = { showDialog = false }
+            onDismiss = {
+                showDialog = false
+            }
         )
     }
 }

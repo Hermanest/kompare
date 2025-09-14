@@ -1,7 +1,10 @@
 package core
 
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.launch
 
 sealed interface IComparisonResult
 
@@ -12,9 +15,13 @@ class AnalyzeResult(results: MutableList<ComparisonGroup>) : IComparisonResult {
     val onGroupRemoved: SharedFlow<ComparisonGroup> = _onGroupRemoved
     val results: List<ComparisonGroup> = _results
 
+    @OptIn(DelicateCoroutinesApi::class)
     fun removeGroup(group: ComparisonGroup) {
         _results.remove(group)
-        _onGroupRemoved.tryEmit(group)
+        
+        GlobalScope.launch {
+            _onGroupRemoved.emit(group)
+        }
     }
 }
 

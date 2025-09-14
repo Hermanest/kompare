@@ -77,6 +77,7 @@ fun ComparisonView() {
 
         ComparisonViewToolbar(
             listWidth = actualListWidth.dp,
+            viewerActive = selectedComparison != null,
             onBack = {
                 navController.popBackStack(StartRoute, false)
             },
@@ -89,7 +90,8 @@ fun ComparisonView() {
                 listWidth = actualListWidth
             },
             onSweepDelete = {
-
+                result.removeGroup(selectedComparison!!)
+                fileManager.deleteGroup(selectedComparison!!)
             },
             onOpenSettings = {
                 settingsOpened = true
@@ -127,13 +129,20 @@ fun ComparisonView() {
                 val notEmpty = filteredComparisons.isNotEmpty()
 
                 if (notEmpty && selectedComparison != null) {
-                    GroupView(
-                        modifier = Modifier.fillMaxSize(),
-                        selectedComparison!!.relative,
-                        onDelete = {
-                            //onDeleteComparison(relativeSelectedComparison.parentGroup, it)
-                        }
-                    )
+                    // A temporary solution to cause recalculation. 
+                    // Ideally we should separate logic from ui via some presenter/viewmodel.
+                    var dummy by remember { mutableStateOf(false) }
+                    
+                    key(dummy) {
+                        GroupView(
+                            modifier = Modifier.fillMaxSize(),
+                            group = selectedComparison!!.relative,
+                            onDelete = {
+                                fileManager.delete(selectedComparison!!, it.path)
+                                dummy = !dummy
+                            }
+                        )
+                    }
                 } else {
                     Text(
                         text = if (notEmpty) "Select something fist" else "Nothing to show",
@@ -142,7 +151,7 @@ fun ComparisonView() {
                 }
             }
 
-            if (comparisons.size > 1) {
+            if (comparisons.isNotEmpty()) {
                 ComparisonList(
                     listWidth = actualListWidth.dp,
                     comparisons = filteredComparisons,

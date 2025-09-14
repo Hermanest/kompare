@@ -16,10 +16,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ui.components.AreaHandle
 import ui.components.ButtonTextField
+import ui.views.comparison.split.DeleteConfirmationDialog
 
 @Composable
 fun ComparisonViewToolbar(
     listWidth: Dp,
+    viewerActive: Boolean,
     onBack: () -> Unit,
     onListWidthChange: (Float) -> Unit,
     onListWidthStartedToChange: () -> Unit,
@@ -27,6 +29,8 @@ fun ComparisonViewToolbar(
     onOpenSettings: () -> Unit,
     onSearch: (String) -> Unit,
 ) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -49,10 +53,11 @@ fun ComparisonViewToolbar(
         ) {
             // Custom button
             @Composable
-            fun ToolbarButton(imageVector: ImageVector, onClick: () -> Unit) {
+            fun ToolbarButton(imageVector: ImageVector, enabled: Boolean = true, onClick: () -> Unit) {
                 FilledIconButton(
                     onClick = onClick,
                     shape = MaterialTheme.shapes.medium,
+                    enabled = enabled,
                 ) {
                     Icon(
                         imageVector = imageVector,
@@ -61,15 +66,28 @@ fun ComparisonViewToolbar(
                 }
             }
 
-            ToolbarButton(Icons.Filled.DeleteSweep) {
-                onSweepDelete()
+            ToolbarButton(Icons.Filled.DeleteSweep, viewerActive) {
+                showDeleteDialog = true
             }
             ToolbarButton(Icons.Filled.Save) {
-                
+
             }
             ToolbarButton(Icons.Filled.Settings) {
                 onOpenSettings()
             }
+        }
+
+        if (showDeleteDialog) {
+            DeleteConfirmationDialog(
+                singleFile = false,
+                onConfirm = {
+                    onSweepDelete()
+                    showDeleteDialog = false
+                },
+                onDismiss = {
+                    showDeleteDialog = false
+                }
+            )
         }
 
         // Draggable handle to change the list size

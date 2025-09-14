@@ -14,6 +14,10 @@ class RelativeComparisonGroup(
 
     val otherComparisons: List<RelativeComparison>
         get() = _filteredComparisons.emptyOr { it.subList(1, it.size) }
+    
+    init {
+        filterBy()
+    }
 
     fun filterBy(threshold: Float = 0f, phrase: String = "") {
         _filteredComparisons.clear()

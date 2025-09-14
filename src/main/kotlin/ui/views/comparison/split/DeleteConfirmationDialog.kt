@@ -7,16 +7,16 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 
 @Composable
-fun DeleteConfirmationDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+fun DeleteConfirmationDialog(singleFile: Boolean, onConfirm: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         backgroundColor = MaterialTheme.colorScheme.background,
         shape = MaterialTheme.shapes.large,
         title = {
-            Text(text = "Delete File")
+            Text(text = "Delete ${if (singleFile) "File" else "Files"}")
         },
         text = {
-            Text(text = "Are you sure you want to delete this file? This action cannot be undone.")
+            Text(text = "Are you sure you want to delete ${if (singleFile) "this file" else "these files"}? This action cannot be undone.")
         },
         confirmButton = {
             TextButton(onClick = onConfirm) {

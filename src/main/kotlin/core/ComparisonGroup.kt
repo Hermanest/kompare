@@ -22,11 +22,9 @@ class ComparisonGroup(comparisons: List<Comparison>) {
 
     fun removePath(path: String) {
         requirePath(path)
+        
         _paths.remove(path)
-
-        if (relative.main.path == path) {
-            relative = getRelativeToFirst()
-        }
+        relative = getRelativeToFirst()
 
         val buffer = ArrayList<Int>()
 

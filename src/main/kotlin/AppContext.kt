@@ -5,7 +5,9 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import core.ComparatorFactory
+import core.ComparisonFileManager
 import core.IComparatorFactory
+import core.IComparisonFileManager
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import platform.IPlatform
@@ -16,6 +18,7 @@ import ui.adapters.ProcessorProvider
 val LocalPlatform = requiredCompositionLocal<IPlatform>()
 val LocalLogger = requiredCompositionLocal<KLogger>()
 val LocalComparatorFactory = requiredCompositionLocal<IComparatorFactory>()
+val LocalFileManager = requiredCompositionLocal<IComparisonFileManager>()
 val LocalProcessorProvider = requiredCompositionLocal<IProcessorProvider>()
 val LocalProcessorProviderMutable = requiredCompositionLocal<ProcessorProvider>()
 val LocalNavController = requiredCompositionLocal<NavHostController>()
@@ -23,12 +26,14 @@ val LocalNavController = requiredCompositionLocal<NavHostController>()
 @Composable
 fun ProvideAppContext(content: @Composable () -> Unit) {
     val factory = ComparatorFactory()
-    val processor = ProcessorProvider(factory)
+    val processor = ProcessorProvider()
+    val fileManager = ComparisonFileManager
     
     CompositionLocalProvider(
         LocalPlatform provides platform,
         LocalLogger provides KotlinLogging.logger {},
         LocalComparatorFactory provides factory,
+        LocalFileManager provides fileManager,
         LocalProcessorProvider provides processor,
         LocalProcessorProviderMutable provides processor,
         LocalNavController provides rememberNavController(),

@@ -65,7 +65,7 @@ fun App() {
         }
 
         composable<ComparisonRoute> {
-            ComparisonView { group, path -> }
+            ComparisonView()
         }
     }
 }

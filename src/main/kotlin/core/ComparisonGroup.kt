@@ -1,55 +1,91 @@
 package core
 
-class ComparisonGroup(val comparisons: List<Comparison>) {
-    private val similarityMap = comparisons
-        .associateBy { Comparison.calcHash(it.path1, it.path2) }
+class ComparisonGroup(comparisons: List<Comparison>) {
+    private val _similarityMap = HashMap<Int, Comparison>(comparisons.size)
+    private val _paths = HashSet<String>(comparisons.size)
+    private var _deleted = false
 
-    val paths = comparisons
-        .flatMap { listOf(it.path1, it.path2) }
-        .toSet()
-        .sorted()
+    init {
+        comparisons.associateByTo(_similarityMap) {
+            Comparison.calcHash(it.path1, it.path2)
+        }
 
-    var mainPath = paths.first()
+        comparisons.forEach {
+            _paths.add(it.path1)
+            _paths.add(it.path2)
+        }
+    }
+
+    val paths get() = requireAlive(_paths)
+    var relative = getRelativeToFirst()
         private set
 
-    val size: Int get() = paths.size
+    fun removePath(path: String) {
+        requirePath(path)
+        _paths.remove(path)
 
-    fun setMainPath(path: String) {
-        require(path in paths) {
-            "Path $path is not in the group"
+        if (relative.main.path == path) {
+            relative = getRelativeToFirst()
         }
-        
-        mainPath = path
-    }
-    
-    fun getComparisons(): RelativeComparisonGroup {
-        return getComparisonsFor(mainPath)
-    }
-    
-    fun getComparisons(path: String): RelativeComparisonGroup {
-        require(path in paths) {
-            "Path $path is not in the group"
+
+        val buffer = ArrayList<Int>()
+
+        _similarityMap.forEach { (key, value) ->
+            if (value.path1 == path || value.path2 == path) {
+                buffer.add(key)
+            }
         }
-        
-        return getComparisonsFor(path)
+
+        buffer.forEach {
+            _similarityMap.remove(it)
+        }
     }
 
-    private fun getComparisonsFor(anchor: String): RelativeComparisonGroup {
+    fun markGroupDeleted() {
+        _paths.clear()
+        _deleted = true
+    }
+
+    fun changeRelativityAnchor(path: String) {
+        requirePath(path)
+
+        relative = getRelativeTo(path)
+    }
+
+    private fun getRelativeTo(anchor: String): RelativeComparisonGroup {
         val filtered = paths
             .asSequence()
             .filter { it != anchor }
             .mapNotNull { other ->
                 val hash = Comparison.calcHash(anchor, other)
-                similarityMap[hash]
+                _similarityMap[hash]
             }
             .map {
                 RelativeComparison(
-                    path = if (it.path1 == anchor) it.path2 else it.path1, 
+                    path = if (it.path1 == anchor) it.path2 else it.path1,
                     similarity = it.similarity
                 )
             }
             .toList()
 
-        return RelativeComparisonGroup(anchor, filtered, this)
+        return RelativeComparisonGroup(anchor, filtered)
+    }
+
+    private fun getRelativeToFirst(): RelativeComparisonGroup {
+        return getRelativeTo(_paths.first())
+    }
+
+    private fun requirePath(path: String) {
+        require(path in paths) {
+            "Path $path is not in the group"
+        }
+    }
+
+    private fun <T> requireAlive(instance: T): T {
+        require(!_deleted) {
+            "The group is deleted"
+        }
+
+        return instance
     }
 }

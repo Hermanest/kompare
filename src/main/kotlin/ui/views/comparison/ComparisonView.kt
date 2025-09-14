@@ -1,55 +1,67 @@
 package ui.views.comparison
 
+import LocalFileManager
 import LocalNavController
 import LocalProcessorProvider
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import core.AnalyzeInitData
 import core.AnalyzeResult
 import core.ComparisonGroup
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import ui.views.comparison.split.GroupView
 import ui.views.start.StartRoute
-import ui.views.start.StartView
-import utils.stableKey
 
 @Serializable
 object ComparisonRoute
 
 @Composable
-fun ComparisonView(
-    onDeleteComparison: (ComparisonGroup, String) -> Unit
-) {
+fun ComparisonView() {
     val navController = LocalNavController.current
-    val result = LocalProcessorProvider.current.processor.result as AnalyzeResult
+    val fileManager = LocalFileManager.current
+    val processor = LocalProcessorProvider.current.processor
 
+    val result = processor.result as AnalyzeResult
+    val initData = processor.initData as AnalyzeInitData
     val comparisons = result.results
+
     var selectedComparison by remember { mutableStateOf<ComparisonGroup?>(null) }
-    var filterThreshold by remember { mutableStateOf(0.5f) }
-    val comparisonsKey = comparisons.stableKey()
+    val filteredComparisons = remember { mutableStateListOf<ComparisonGroup>() }
+    var filterOffThreshold by remember { mutableStateOf(initData.filterOffThreshold) }
 
-    val relativeComparisons = remember(comparisonsKey) {
-        comparisons.associateWith { it.getComparisons() }
-    }
+    var settingsOpened by remember { mutableStateOf(false) }
 
-    val relativeSelectedComparison = remember(selectedComparison, comparisonsKey) {
-        if (selectedComparison != null) {
-            relativeComparisons[selectedComparison]
-        } else {
-            null
+    // TODO: create a shared data source
+    LaunchedEffect(comparisons, filterOffThreshold) {
+        // Notifies the collection only once at the end of scope
+        Snapshot.withoutReadObservation {
+            filteredComparisons.clear()
+
+            comparisons.forEach {
+                it.relative.setThreshold(filterOffThreshold)
+
+                if (it.relative.otherComparisons.isNotEmpty()) {
+                    filteredComparisons.add(it)
+                }
+            }
         }
-    }
+        
+        if (selectedComparison?.relative?.combinedComparisons?.isEmpty() ?: false) {
+            selectedComparison = null
+        }
 
-    val filteredComparisons = remember(comparisonsKey, filterThreshold) {
-        val threshold = filterThreshold.toDouble()
-
-        relativeComparisons.values
-            .map { it.withThreshold(threshold) }
-            .filter { it.otherComparisons.isNotEmpty() }
+        launch {
+            result.onGroupRemoved.collect {
+                filteredComparisons.remove(it)
+            }
+        }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -70,8 +82,28 @@ fun ComparisonView(
                 // Once the pointer is released, we reset achieved width to the actual width
                 // so the cursor will start moving the handle immediately next time we drag
                 listWidth = actualListWidth
+            },
+            onSweepDelete = {
+
+            },
+            onOpenSettings = {
+                settingsOpened = true
             }
         )
+
+        if (settingsOpened) {
+            FiltersDialog(
+                initData = initData,
+                currentThreshold = filterOffThreshold,
+                onDismiss = {
+                    settingsOpened = false
+                },
+                onApply = {
+                    filterOffThreshold = it
+                    settingsOpened = false
+                }
+            )
+        }
 
         Row(
             modifier = Modifier
@@ -86,12 +118,12 @@ fun ComparisonView(
             ) {
                 val notEmpty = filteredComparisons.isNotEmpty()
 
-                if (notEmpty && relativeSelectedComparison != null) {
+                if (notEmpty && selectedComparison != null) {
                     GroupView(
                         modifier = Modifier.fillMaxSize(),
-                        relativeSelectedComparison,
+                        selectedComparison!!.relative,
                         onDelete = {
-                            onDeleteComparison(relativeSelectedComparison.parentGroup, it)
+                            //onDeleteComparison(relativeSelectedComparison.parentGroup, it)
                         }
                     )
                 } else {
@@ -106,9 +138,9 @@ fun ComparisonView(
                 ComparisonList(
                     listWidth = actualListWidth.dp,
                     comparisons = filteredComparisons,
-                    unfilteredComparisonsSize = relativeComparisons.size,
-                    selectedComparison = relativeSelectedComparison,
-                    onSelectComparison = { selectedComparison = it.parentGroup }
+                    unfilteredComparisonsSize = comparisons.size,
+                    selectedComparison = selectedComparison,
+                    onSelectComparison = { selectedComparison = it }
                 )
             }
         }

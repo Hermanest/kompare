@@ -15,15 +15,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import core.ComparisonGroup
 import core.RelativeComparisonGroup
 
 @Composable
 fun ComparisonList(
     listWidth: Dp,
-    comparisons: List<RelativeComparisonGroup>,
+    comparisons: List<ComparisonGroup>,
     unfilteredComparisonsSize: Int,
-    selectedComparison: RelativeComparisonGroup?,
-    onSelectComparison: (RelativeComparisonGroup) -> Unit,
+    selectedComparison: ComparisonGroup?,
+    onSelectComparison: (ComparisonGroup) -> Unit,
 ) {
     Column(modifier = Modifier.width(listWidth)) {
         LazyColumn(
@@ -35,7 +36,7 @@ fun ComparisonList(
                 val comparison = comparisons[i]
 
                 ComparisonListItem(
-                    comparison,
+                    comparison.relative,
                     isSelected = comparison == selectedComparison
                 ) {
                     onSelectComparison(comparison)

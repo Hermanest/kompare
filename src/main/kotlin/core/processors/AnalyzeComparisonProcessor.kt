@@ -18,7 +18,7 @@ private typealias GroupedImages = HashMap<Float, BatchedImages>
 private typealias BatchedImages = ArrayList<Pair<String, Mat>>
 
 class AnalyzeComparisonProcessor(
-    private val data: AnalyzeInitData,
+    override val initData: AnalyzeInitData,
     private val comparator: IImageComparator
 ) : IComparisonProcessor {
     companion object {
@@ -50,7 +50,7 @@ class AnalyzeComparisonProcessor(
     }
 
     private suspend fun compare(): MutableList<ComparisonGroup> {
-        val paths = getImagePaths(data.directoryPath)
+        val paths = getImagePaths(initData.directoryPath)
         val groupedImages = GroupedImages(paths.size)
 
         coroutineScope {
@@ -122,7 +122,7 @@ class AnalyzeComparisonProcessor(
                     val (comparePath, compareImage) = images[j]
                     val similarity = comparator.compare(baseImage, compareImage)
 
-                    if (similarity >= 0.5) {
+                    if (similarity >= initData.filterOffThreshold) {
                         results.add(Comparison(basePath, comparePath, similarity))
                     }
                 }
@@ -208,7 +208,7 @@ class AnalyzeComparisonProcessor(
     }
 
     private fun getImagePaths(path: String): List<String> {
-        return File(data.directoryPath)
+        return File(path)
             .listFiles()
             ?.filter {
                 it.isFile && when (it.extension) {

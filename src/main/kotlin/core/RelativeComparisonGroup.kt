@@ -2,24 +2,42 @@ package core
 
 class RelativeComparisonGroup(
     mainPath: String,
-    val otherComparisons: List<RelativeComparison>,
-    val parentGroup: ComparisonGroup
+    comparisons: List<RelativeComparison>
 ) {
+    private val _comparisons = comparisons
+    private val _filteredComparisons = ArrayList<RelativeComparison>(comparisons.size)
+
     val main = RelativeComparison(mainPath, 1.0)
-    val combinedComparisons = listOf(main) + otherComparisons
-    
-    fun withThreshold(threshold: Double): RelativeComparisonGroup {
-        return RelativeComparisonGroup(
-            main.path,
-            otherComparisons.filter { it.similarity >= threshold },
-            parentGroup
-        )
+
+    val combinedComparisons: List<RelativeComparison>
+        get() = _filteredComparisons.emptyOr { it }
+
+    val otherComparisons: List<RelativeComparison>
+        get() = _filteredComparisons.emptyOr { it.subList(1, it.size - 1) }
+
+    fun setThreshold(threshold: Float) {
+        _filteredComparisons.clear()
+        _filteredComparisons.add(main)
+
+        _comparisons.forEach {
+            if (it.percentage / 100 >= threshold) {
+                _filteredComparisons.add(it)
+            }
+        }
+    }
+
+    private inline fun <T> List<T>.emptyOr(delegate: (List<T>) -> List<T>): List<T> {
+        return if (this.size > 1) {
+            delegate(this)
+        } else {
+            emptyList()
+        }
     }
 
     override fun hashCode(): Int {
         return main.path.hashCode()
     }
-    
+
     override fun equals(other: Any?): Boolean {
         return main.path == (other as? RelativeComparisonGroup)?.main?.path
     }

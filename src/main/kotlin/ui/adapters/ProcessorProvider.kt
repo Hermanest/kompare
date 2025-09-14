@@ -1,9 +1,8 @@
 package ui.adapters
 
-import core.IComparatorFactory
 import core.IComparisonProcessor
 
-class ProcessorProvider(private val factory: IComparatorFactory) : IProcessorProvider {
+class ProcessorProvider : IProcessorProvider {
     override val processor: IComparisonProcessor
         get() = _processor ?: throw IllegalStateException("Processor is not initialized")
     

@@ -28,7 +28,7 @@ class RelativeComparisonGroup(
                 return@forEach
             }
             
-            if (!it.path.contains(phrase)) {
+            if (!it.path.contains(phrase, true)) {
                 return@forEach
             }
 

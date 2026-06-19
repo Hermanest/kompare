@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ui.components.AreaHandle
 import ui.components.ButtonTextField
-import ui.views.comparison.split.DeleteConfirmationDialog
 
 @Composable
 fun ComparisonViewToolbar(
@@ -29,8 +28,6 @@ fun ComparisonViewToolbar(
     onOpenSettings: () -> Unit,
     onSearch: (String) -> Unit,
 ) {
-    var showDeleteDialog by remember { mutableStateOf(false) }
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -66,28 +63,13 @@ fun ComparisonViewToolbar(
                 }
             }
 
-            ToolbarButton(Icons.Filled.DeleteSweep, viewerActive) {
-                showDeleteDialog = true
-            }
+            ToolbarButton(Icons.Filled.DeleteSweep, viewerActive, onClick = onSweepDelete)
             ToolbarButton(Icons.Filled.Save) {
 
             }
             ToolbarButton(Icons.Filled.Settings) {
                 onOpenSettings()
             }
-        }
-
-        if (showDeleteDialog) {
-            DeleteConfirmationDialog(
-                singleFile = false,
-                onConfirm = {
-                    onSweepDelete()
-                    showDeleteDialog = false
-                },
-                onDismiss = {
-                    showDeleteDialog = false
-                }
-            )
         }
 
         // Draggable handle to change the list size

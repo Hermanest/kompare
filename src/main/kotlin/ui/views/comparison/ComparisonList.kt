@@ -1,11 +1,6 @@
 package ui.views.comparison
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -15,16 +10,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import core.ComparisonGroup
-import core.RelativeComparisonGroup
+import ui.views.comparison.models.UiComparisonGroup
+import ui.views.comparison.models.UiComparisonsList
 
 @Composable
 fun ComparisonList(
     listWidth: Dp,
-    comparisons: List<ComparisonGroup>,
-    unfilteredComparisonsSize: Int,
-    selectedComparison: ComparisonGroup?,
-    onSelectComparison: (ComparisonGroup) -> Unit,
+    comparisons: UiComparisonsList,
+    selectedComparison: UiComparisonGroup?,
+    onSelectComparison: (UiComparisonGroup) -> Unit,
 ) {
     Column(modifier = Modifier.width(listWidth)) {
         LazyColumn(
@@ -32,11 +26,11 @@ fun ComparisonList(
                 .weight(1f)
                 .padding(top = 4.dp, end = 10.dp)
         ) {
-            items(comparisons.size) { i ->
-                val comparison = comparisons[i]
+            items(comparisons.groups.size) { i ->
+                val comparison = comparisons.groups[i]
 
                 ComparisonListItem(
-                    comparison.relative,
+                    comparison,
                     isSelected = comparison == selectedComparison
                 ) {
                     onSelectComparison(comparison)
@@ -52,7 +46,7 @@ fun ComparisonList(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Showing ${comparisons.size} results out of $unfilteredComparisonsSize",
+                text = "Showing ${comparisons.groups.size} results out of ${comparisons.totalSize}",
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.labelMedium,
             )

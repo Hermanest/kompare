@@ -20,13 +20,13 @@ import platform.platform
 @Composable
 fun ImageDetailsPanel(
     path: String,
+    deleted: Boolean,
     bitmap: ImageBitmap,
     modifier: Modifier = Modifier,
-    onDelete: () -> Unit,
+    onDeleteOrRestore: () -> Unit,
 ) {
     val resolution = remember(bitmap) { "${bitmap.width} x ${bitmap.height}" }
     val fileSize = remember(path) { getFileSize(path) }
-    var showDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -81,9 +81,9 @@ fun ImageDetailsPanel(
         ) {
             Button(
                 shape = MaterialTheme.shapes.medium,
-                onClick = { showDialog = true }
+                onClick = onDeleteOrRestore,
             ) {
-                Text(text = "Delete")
+                Text(text = if (deleted) "Restore" else "Delete")
             }
             Button(
                 shape = MaterialTheme.shapes.medium,
@@ -96,19 +96,6 @@ fun ImageDetailsPanel(
                 )
             }
         }
-    }
-
-    if (showDialog) {
-        DeleteConfirmationDialog(
-            singleFile = true,
-            onConfirm = {
-                onDelete()
-                showDialog = false
-            },
-            onDismiss = {
-                showDialog = false
-            }
-        )
     }
 }
 

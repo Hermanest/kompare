@@ -6,16 +6,16 @@ import LocalProcessorProvider
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import core.AnalyzeInitData
 import core.AnalyzeResult
-import core.ComparisonGroup
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import ui.views.comparison.models.UiComparisonGroup
+import ui.views.comparison.models.UiComparisonsList
+import ui.views.comparison.models.UiGroupFilter
 import ui.views.comparison.split.GroupView
 import ui.views.start.StartRoute
 
@@ -32,42 +32,11 @@ fun ComparisonView() {
     val initData = processor.initData as AnalyzeInitData
     val comparisons = result.results
 
-    var selectedComparison by remember { mutableStateOf<ComparisonGroup?>(null) }
-    val filteredComparisons = remember { mutableStateListOf<ComparisonGroup>() }
+    val comparisonsList = remember { UiComparisonsList(result.results) }
+    var selectedGroup by remember { mutableStateOf<UiComparisonGroup?>(null) }
 
-    var filterOffThreshold by remember { mutableStateOf(initData.filterOffThreshold) }
-    var filterText by remember { mutableStateOf("") }
-
-    var settingsOpened by remember { mutableStateOf(false) }
-
-    // TODO: create a shared data source
-    LaunchedEffect(comparisons, filterOffThreshold, filterText) {
-        // Notifies the collection only once at the end of scope
-        Snapshot.withoutReadObservation {
-            filteredComparisons.clear()
-
-            comparisons.forEach {
-                it.relative.filterBy(
-                    threshold = filterOffThreshold,
-                    phrase = filterText
-                )
-
-                if (it.relative.combinedComparisons.isNotEmpty()) {
-                    filteredComparisons.add(it)
-                }
-            }
-        }
-
-        if (selectedComparison?.relative?.combinedComparisons?.isEmpty() ?: false) {
-            selectedComparison = null
-        }
-
-        launch {
-            result.onGroupRemoved.collect {
-                filteredComparisons.remove(it)
-            }
-        }
-    }
+    var filtersOpened by remember { mutableStateOf(false) }
+    var filter by remember { mutableStateOf(UiGroupFilter(initData.filterOffThreshold, null)) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         var listWidth by remember { mutableStateOf(300f) }
@@ -77,7 +46,7 @@ fun ComparisonView() {
 
         ComparisonViewToolbar(
             listWidth = actualListWidth.dp,
-            viewerActive = selectedComparison != null,
+            viewerActive = selectedGroup != null,
             onBack = {
                 navController.popBackStack(StartRoute, false)
             },
@@ -90,27 +59,25 @@ fun ComparisonView() {
                 listWidth = actualListWidth
             },
             onSweepDelete = {
-                result.removeGroup(selectedComparison!!)
-                fileManager.deleteGroup(selectedComparison!!)
+                selectedGroup?.deleteSweep()
             },
             onOpenSettings = {
-                settingsOpened = true
+                filtersOpened = true
             },
             onSearch = {
-                filterText = it
+                filter = filter.copy(filterPhrase = it)
             }
         )
 
-        if (settingsOpened) {
+        if (filtersOpened) {
             FiltersDialog(
-                initData = initData,
-                currentThreshold = filterOffThreshold,
+                filter = filter,
                 onDismiss = {
-                    settingsOpened = false
+                    filtersOpened = false
                 },
                 onApply = {
-                    filterOffThreshold = it
-                    settingsOpened = false
+                    filter = it
+                    filtersOpened = false
                 }
             )
         }
@@ -126,23 +93,13 @@ fun ComparisonView() {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                val notEmpty = filteredComparisons.isNotEmpty()
+                val notEmpty = comparisonsList.groups.isNotEmpty()
 
-                if (notEmpty && selectedComparison != null) {
-                    // A temporary solution to cause recalculation. 
-                    // Ideally we should separate logic from ui via some presenter/viewmodel.
-                    var dummy by remember { mutableStateOf(false) }
-                    
-                    key(dummy) {
-                        GroupView(
-                            modifier = Modifier.fillMaxSize(),
-                            group = selectedComparison!!.relative,
-                            onDelete = {
-                                fileManager.delete(selectedComparison!!, it.path)
-                                dummy = !dummy
-                            }
-                        )
-                    }
+                if (notEmpty && selectedGroup != null) {
+                    GroupView(
+                        modifier = Modifier.fillMaxSize(),
+                        group = selectedGroup!!
+                    )
                 } else {
                     Text(
                         text = if (notEmpty) "Select something fist" else "Nothing to show",
@@ -154,10 +111,9 @@ fun ComparisonView() {
             if (comparisons.isNotEmpty()) {
                 ComparisonList(
                     listWidth = actualListWidth.dp,
-                    comparisons = filteredComparisons,
-                    unfilteredComparisonsSize = comparisons.size,
-                    selectedComparison = selectedComparison,
-                    onSelectComparison = { selectedComparison = it }
+                    comparisons = comparisonsList,
+                    selectedComparison = selectedGroup,
+                    onSelectComparison = { selectedGroup = it }
                 )
             }
         }

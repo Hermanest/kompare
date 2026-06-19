@@ -10,35 +10,29 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import core.RelativeComparison
-import core.RelativeComparisonGroup
+import ui.views.comparison.models.UiComparisonGroup
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupView(
     modifier: Modifier = Modifier,
-    group: RelativeComparisonGroup,
-    onDelete: (RelativeComparison) -> Unit,
+    group: UiComparisonGroup
 ) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(250.dp),
         horizontalArrangement = Arrangement.SpaceAround,
         modifier = modifier
     ) {
-        items(group.combinedComparisons.size) { index ->
+        items(group.comparisons.size) { index ->
             Card(
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxSize()
             ) {
-                val item = group.combinedComparisons[index]
-
                 ImagePanel(
                     modifier = Modifier,
                     index = index,
-                    group = group,
-                    match = if (index > 0) item.percentage else -1.0,
-                    onDelete = { onDelete(item) }
+                    group = group
                 )
             }
         }

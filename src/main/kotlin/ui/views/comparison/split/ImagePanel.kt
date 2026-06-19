@@ -7,35 +7,36 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.onClick
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import core.RelativeComparisonGroup
+import ui.utils.BitmapStorage
 import ui.utils.getBitmapFromStorage
+import ui.views.comparison.models.UiComparisonGroup
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ImagePanel(
     index: Int,
-    group: RelativeComparisonGroup,
-    match: Double,
-    modifier: Modifier = Modifier,
-    onDelete: () -> Unit
+    group: UiComparisonGroup,
+    modifier: Modifier = Modifier
 ) {
     var dialogOpen by remember { mutableStateOf(false) }
 
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+    val comp = group.comparisons[index]
+    val deletedOrFiltered = comp.isDeleted || comp.isFiltered
 
+    Column(
+        modifier = modifier.alpha(if (deletedOrFiltered) 0.5F else 1F),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         if (dialogOpen) {
             var previewIndex by remember(index) { mutableStateOf(index) }
 
-            val previewPath = group.combinedComparisons[previewIndex].path
+            val previewPath = group.comparisons[previewIndex].path
             val previewBitmap = previewPath.getBitmapFromStorage()
 
             ExpandedImageView(
@@ -43,7 +44,7 @@ fun ImagePanel(
                 path = previewPath,
                 onClose = { dialogOpen = false },
                 onNext = {
-                    if (previewIndex < group.combinedComparisons.size - 1) {
+                    if (previewIndex < group.comparisons.size - 1) {
                         previewIndex++
                     }
                 },
@@ -55,8 +56,7 @@ fun ImagePanel(
             )
         }
 
-        val path = group.combinedComparisons[index].path
-        val bitmap = path.getBitmapFromStorage()
+        val bitmap = BitmapStorage.getBitmap(comp.path)
 
         Image(
             bitmap = bitmap,
@@ -66,17 +66,24 @@ fun ImagePanel(
             contentDescription = null
         )
         Text(
-            text = if (match >= 0) "Match: $match%" else "Main Image",
+            text = if (index != 0) "Match: ${comp.percentage}%" else "Main Image",
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(2.dp),
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold,
         )
         ImageDetailsPanel(
-            path = path,
+            path = comp.path,
+            deleted = comp.isDeleted,
             bitmap = bitmap,
             modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
-            onDelete = onDelete
+            onDeleteOrRestore = {
+                if (!comp.isDeleted) {
+                    group.delete(index)
+                } else {
+                    group.restore(index)
+                }
+            }
         )
     }
 }

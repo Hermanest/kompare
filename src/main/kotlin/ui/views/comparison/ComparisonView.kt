@@ -1,8 +1,6 @@
 package ui.views.comparison
 
-import LocalFileManager
 import LocalNavController
-import LocalProcessorProvider
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -10,8 +8,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import core.AnalyzeInitData
-import core.AnalyzeResult
 import kotlinx.serialization.Serializable
 import ui.views.comparison.models.UiComparisonGroup
 import ui.views.comparison.models.UiComparisonsList
@@ -23,20 +19,12 @@ import ui.views.start.StartRoute
 object ComparisonRoute
 
 @Composable
-fun ComparisonView() {
+fun ComparisonView(comparisonsList: UiComparisonsList) {
     val navController = LocalNavController.current
-    val fileManager = LocalFileManager.current
-    val processor = LocalProcessorProvider.current.processor
 
-    val result = processor.result as AnalyzeResult
-    val initData = processor.initData as AnalyzeInitData
-    val comparisons = result.results
-
-    val comparisonsList = remember { UiComparisonsList(result.results) }
     var selectedGroup by remember { mutableStateOf<UiComparisonGroup?>(null) }
-
     var filtersOpened by remember { mutableStateOf(false) }
-    var filter by remember { mutableStateOf(UiGroupFilter(initData.filterOffThreshold, null)) }
+    var filter by remember { mutableStateOf(UiGroupFilter(comparisonsList.groupingThreshold, null)) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         var listWidth by remember { mutableStateOf(300f) }
@@ -108,7 +96,7 @@ fun ComparisonView() {
                 }
             }
 
-            if (comparisons.isNotEmpty()) {
+            if (comparisonsList.totalSize > 0) {
                 ComparisonList(
                     listWidth = actualListWidth.dp,
                     comparisons = comparisonsList,

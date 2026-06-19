@@ -1,6 +1,7 @@
 package ui
 
 import LocalNavController
+import LocalProcessorProvider
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
@@ -8,8 +9,11 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import core.AnalyzeInitData
+import core.AnalyzeResult
 import ui.views.comparison.ComparisonRoute
 import ui.views.comparison.ComparisonView
+import ui.views.comparison.models.UiComparisonsList
 import ui.views.loading.LoadingRoute
 import ui.views.loading.LoadingView
 import ui.views.start.StartRoute
@@ -65,7 +69,13 @@ fun App() {
         }
 
         composable<ComparisonRoute> {
-            ComparisonView()
+            val processor = LocalProcessorProvider.current.processor
+            val result = processor.result as AnalyzeResult
+            val initData = processor.initData as AnalyzeInitData
+
+            val model = UiComparisonsList(initData.filterOffThreshold, result.results)
+
+            ComparisonView(model)
         }
     }
 }

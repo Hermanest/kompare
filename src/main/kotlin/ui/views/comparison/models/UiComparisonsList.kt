@@ -13,6 +13,7 @@ enum class SortOrder {
 }
 
 class UiComparisonsList(
+    val groupingThreshold: Float,
     private val rawGroups: List<ComparisonGroup>
 ) {
     private var sortOrder by mutableStateOf(SortOrder.NONE)

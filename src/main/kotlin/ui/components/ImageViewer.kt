@@ -25,7 +25,7 @@ class ImageViewerState {
     var posX by mutableStateOf(0f)
     var posY by mutableStateOf(0f)
     var scale by mutableStateOf(1f)
-    
+
     fun reset() {
         posX = 0f
         posY = 0f
@@ -53,7 +53,7 @@ fun ImageViewer(
         maxZoom,
         minZoom,
         state
-    ) 
+    )
 }
 
 @Composable
@@ -67,7 +67,7 @@ fun ImageViewer(
     var snapEnabled by remember { mutableStateOf(false) }
     var size by remember { mutableStateOf(IntSize(0, 0)) }
     var st by remember { mutableStateOf(state) }
-    
+
     if (st != state) {
         st = state
     }
@@ -78,9 +78,9 @@ fun ImageViewer(
         scale: Float = st.scale
     ) {
         st.scale = scale.clamp(minZoom, maxZoom)
-        
-        val thresholdX = (st.scale * size.width / 2) - size.width / 2
-        val thresholdY = (st.scale * size.height / 2) - size.height / 2
+
+        val thresholdX = ((st.scale * size.width) - size.width).coerceAtLeast(0f) / 2f
+        val thresholdY = ((st.scale * size.height) - size.height).coerceAtLeast(0f) / 2f
 
         st.posX = posX.clamp(-thresholdX, thresholdX)
         st.posY = posY.clamp(-thresholdY, thresholdY)
@@ -89,15 +89,33 @@ fun ImageViewer(
     BoxWithConstraints(modifier) {
         Box(
             modifier = Modifier
+                .fillMaxSize()
                 .pointerInput(Unit) {
                     awaitPointerEventScope {
                         while (true) {
                             val event = awaitPointerEvent()
-                            val changes = event.changes.first().apply { consume() }
-   
+                            val change = event.changes.first()
+                            change.consume()
+
                             when (event.type) {
                                 PointerEventType.Scroll -> {
-                                    recalculateBounds(scale = st.scale + changes.scrollDelta.y * 0.01f)
+                                    val mousePos = change.position
+
+                                    val centerX = size.width / 2f
+                                    val centerY = size.height / 2f
+                                    val focalX = mousePos.x - centerX
+                                    val focalY = mousePos.y - centerY
+
+                                    val oldScale = st.scale
+                                    val newScale = (oldScale + change.scrollDelta.y * 0.02f).clamp(minZoom, maxZoom)
+
+                                    if (newScale != oldScale) {
+                                        val scaleFactor = newScale / oldScale
+                                        val newPosX = focalX - (focalX - st.posX) * scaleFactor
+                                        val newPosY = focalY - (focalY - st.posY) * scaleFactor
+
+                                        recalculateBounds(posX = newPosX, posY = newPosY, scale = newScale)
+                                    }
                                 }
 
                                 PointerEventType.Press -> {
@@ -109,11 +127,9 @@ fun ImageViewer(
                                 }
 
                                 PointerEventType.Move -> {
-                                    if (!snapEnabled) {
-                                        continue
-                                    }
-                                    
-                                    val delta = changes.position - changes.previousPosition
+                                    if (!snapEnabled) continue
+
+                                    val delta = change.position - change.previousPosition
                                     recalculateBounds(st.posX + delta.x, st.posY + delta.y)
                                 }
                             }

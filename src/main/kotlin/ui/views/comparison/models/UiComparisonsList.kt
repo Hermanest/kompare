@@ -12,43 +12,43 @@ enum class SortOrder {
     NONE
 }
 
+enum class SortBy {
+    SIMILARITY,
+    ALPHABET,
+}
+
 class UiComparisonsList(
     val groupingThreshold: Float,
     private val rawGroups: List<ComparisonGroup>
-) {
-    private var sortOrder by mutableStateOf(SortOrder.NONE)
+) : AbstractList<UiComparisonGroup>() {
+    var sortOrder by mutableStateOf(SortOrder.NONE)
+    var sortBy by mutableStateOf(SortBy.SIMILARITY)
+
     private val groupsCache = mutableMapOf<Int, UiComparisonGroup>()
 
-    val groups: List<UiComparisonGroup> = object : AbstractList<UiComparisonGroup>() {
-        private val sortedIndices: List<Int> by derivedStateOf {
-            val originalIndices = rawGroups.indices.toList()
-            when (sortOrder) {
-                SortOrder.ASCENDING -> originalIndices.sorted()
-                SortOrder.DESCENDING -> originalIndices.sortedDescending()
-                SortOrder.NONE -> originalIndices
-            }
-        }
-
-        override val size: Int get() = rawGroups.size
-
-        override fun get(index: Int): UiComparisonGroup {
-            val originalGroupIndex = sortedIndices[index]
-
-            return synchronized(groupsCache) {
-                groupsCache.getOrPut(originalGroupIndex) {
-                    UiComparisonGroup(
-                        id = originalGroupIndex,
-                        rawGroup = rawGroups[originalGroupIndex]
-                    )
-                }
-            }
+    private val sortedIndices: List<Int> by derivedStateOf {
+        val originalIndices = rawGroups.indices.toList()
+        when (sortOrder) {
+            SortOrder.ASCENDING -> originalIndices.sorted()
+            SortOrder.DESCENDING -> originalIndices.sortedDescending()
+            SortOrder.NONE -> originalIndices
         }
     }
 
-    val totalSize = groups.size
+    override val size: Int get() = rawGroups.size
+    val totalSize = rawGroups.size
 
-    fun sort(order: SortOrder) {
-        sortOrder = order
+    override fun get(index: Int): UiComparisonGroup {
+        val originalGroupIndex = sortedIndices[index]
+
+        return synchronized(groupsCache) {
+            groupsCache.getOrPut(originalGroupIndex) {
+                UiComparisonGroup(
+                    id = originalGroupIndex,
+                    rawGroup = rawGroups[originalGroupIndex]
+                )
+            }
+        }
     }
 
     fun filter(predicate: (UiComparisonGroup, UiComparison) -> Boolean) {

@@ -26,8 +26,8 @@ fun ComparisonList(
                 .weight(1f)
                 .padding(top = 4.dp, end = 10.dp)
         ) {
-            items(comparisons.groups.size) { i ->
-                val comparison = comparisons.groups[i]
+            items(comparisons.size) { i ->
+                val comparison = comparisons[i]
 
                 ComparisonListItem(
                     comparison,
@@ -46,7 +46,7 @@ fun ComparisonList(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Showing ${comparisons.groups.size} results out of ${comparisons.totalSize}",
+                text = "Showing ${comparisons.size} results out of ${comparisons.totalSize}",
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.labelMedium,
             )

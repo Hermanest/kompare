@@ -81,7 +81,7 @@ fun ComparisonView(comparisonsList: UiComparisonsList) {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                val notEmpty = comparisonsList.groups.isNotEmpty()
+                val notEmpty = comparisonsList.isNotEmpty()
 
                 if (notEmpty && selectedGroup != null) {
                     GroupView(

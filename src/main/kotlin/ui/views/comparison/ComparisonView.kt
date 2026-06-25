@@ -49,9 +49,6 @@ fun ComparisonView(comparisonsList: UiComparisonsList) {
             onSweepDelete = {
                 selectedGroup?.deleteSweep()
             },
-            onOpenSettings = {
-                filtersOpened = true
-            },
             onSearch = {
                 filter = filter.copy(filterPhrase = it)
             }

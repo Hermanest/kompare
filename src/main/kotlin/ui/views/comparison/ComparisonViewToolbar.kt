@@ -3,10 +3,8 @@ package ui.views.comparison
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DeleteSweep
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,6 +14,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ui.components.AreaHandle
 import ui.components.ButtonTextField
+import ui.components.DropdownSelectorMenu
+import ui.components.DropdownSelectorMenuItem
 
 @Composable
 fun ComparisonViewToolbar(
@@ -25,7 +25,6 @@ fun ComparisonViewToolbar(
     onListWidthChange: (Float) -> Unit,
     onListWidthStartedToChange: () -> Unit,
     onSweepDelete: () -> Unit,
-    onOpenSettings: () -> Unit,
     onSearch: (String) -> Unit,
 ) {
     Row(
@@ -48,28 +47,39 @@ fun ComparisonViewToolbar(
             modifier = Modifier.weight(1f),
             horizontalArrangement = Arrangement.End,
         ) {
-            // Custom button
-            @Composable
-            fun ToolbarButton(imageVector: ImageVector, enabled: Boolean = true, onClick: () -> Unit) {
-                FilledIconButton(
-                    onClick = onClick,
-                    shape = MaterialTheme.shapes.medium,
-                    enabled = enabled,
-                ) {
-                    Icon(
-                        imageVector = imageVector,
-                        contentDescription = null
+            ToolbarButton(
+                imageVector = Icons.Filled.DeleteSweep,
+                enabled = viewerActive,
+                onClick = onSweepDelete
+            )
+
+            var keepAnchorFirst by remember { mutableStateOf(false) }
+
+            ToolbarDropdown(
+                imageVector = Icons.AutoMirrored.Filled.Sort,
+                options = listOf(
+                    "Similarity" to Icons.Filled.Percent,
+                    "Alphabet" to Icons.Filled.Abc
+                ),
+                onOptionSelected = {},
+                bottomContent = {
+                    DropdownSelectorMenuItem(
+                        option = "Keep anchor first" to Icons.Default.Anchor,
+                        toggleable = true,
+                        active = keepAnchorFirst,
+                        onClick = { keepAnchorFirst = !keepAnchorFirst }
                     )
                 }
-            }
+            )
 
-            ToolbarButton(Icons.Filled.DeleteSweep, viewerActive, onClick = onSweepDelete)
-            ToolbarButton(Icons.Filled.Save) {
-
-            }
-            ToolbarButton(Icons.Filled.Settings) {
-                onOpenSettings()
-            }
+            ToolbarDropdown(
+                imageVector = Icons.Filled.SortByAlpha,
+                options = listOf(
+                    "Ascending" to Icons.Filled.ArrowUpward,
+                    "Descending" to Icons.Filled.ArrowDownward
+                ),
+                onOptionSelected = {}
+            )
         }
 
         // Draggable handle to change the list size
@@ -99,6 +109,67 @@ fun ComparisonViewToolbar(
                 },
                 icon = Icons.Default.Search
             )
+        }
+    }
+}
+
+@Composable
+fun ToolbarDropdown(
+    imageVector: ImageVector,
+    options: List<Pair<String, ImageVector?>>,
+    onOptionSelected: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    bottomContent: (@Composable () -> Unit)? = null
+) {
+    var expanded by remember { mutableStateOf(false) }
+    var selectedOption by remember { mutableStateOf(options.firstOrNull()?.first ?: "") }
+
+    Box(modifier = modifier) {
+        ToolbarButton(
+            imageVector = imageVector,
+            onClick = { expanded = true }
+        )
+
+        DropdownSelectorMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            options = options,
+            selectedOption = selectedOption,
+            onOptionSelected = {
+                selectedOption = it
+                onOptionSelected(it)
+            },
+            bottomContent = bottomContent
+        )
+    }
+}
+
+@Composable
+fun ToolbarButton(
+    imageVector: ImageVector,
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+    content: (@Composable () -> Unit)? = null
+) {
+    FilledIconButton(
+        onClick = onClick,
+        shape = MaterialTheme.shapes.medium,
+        enabled = enabled,
+    ) {
+        if (content == null) {
+            Icon(
+                imageVector = imageVector,
+                contentDescription = null
+            )
+        } else {
+            Box {
+                Icon(
+                    imageVector = imageVector,
+                    contentDescription = null
+                )
+
+                content
+            }
         }
     }
 }

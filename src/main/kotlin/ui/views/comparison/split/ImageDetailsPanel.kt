@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import utils.getFileSize
+import utils.getFileInfo
 import kotlin.io.path.Path
 import platform.platform
 
@@ -26,7 +26,7 @@ fun ImageDetailsPanel(
     onDeleteOrRestore: () -> Unit,
 ) {
     val resolution = remember(bitmap) { "${bitmap.width} x ${bitmap.height}" }
-    val fileSize = remember(path) { getFileSize(path) }
+    val fileInfo = remember(path) { getFileInfo(path) }
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -39,7 +39,13 @@ fun ImageDetailsPanel(
         )
 
         Text(
-            text = "Size: $fileSize",
+            text = "Created: ${fileInfo.creationDate}",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        Text(
+            text = "Size: ${fileInfo.size}",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface
         )
